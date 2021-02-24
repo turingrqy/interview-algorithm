@@ -3,6 +3,7 @@ package other
 import (
 	"fmt"
 	"math"
+	"renqiyang/interview/heap_sort"
 	"renqiyang/interview/tree"
 	"strconv"
 )
@@ -283,6 +284,7 @@ func DeleteDupInArr (arr []int) {
 // b^0=b
 // a^b^a = b^(a^a)=b^0=b
 //数组中只出现一次的数字
+//相同取0，相异取1。（二进制）
 func SingleNumInArr (arr []int) int {
 	res := 0
 	for i:=0; i< len(arr);i++ {
@@ -521,6 +523,164 @@ func GetLongestUpInMemo(arr []int, i int, dp *[]int) int {
 	(*dp)[i] = max
 	return (*dp)[i]
 }
+
+/*
+给定一个整数数组找到3个数的和最接近于target
+ */
+func GetClosestThreeNumSum(arr []int64, target int64) (a,b,c,sum int64) {
+	//1.先排序
+	//2.遍历选择第一个数据a
+	heap_sort.HeapSort(arr)
+	var aBest,bBest,cBest,sumBest int64
+	sumBest = math.MinInt64
+	for i:= 0; i< len(arr)-2;i++ {
+		k := i+1
+		j := len(arr)-1
+		needReduce := false
+		needPlus := false
+		sum := int64(0)
+		for k<j {
+			sum = arr[i] + arr[k] + arr[j]
+			if  sum < target {
+				k++
+				needReduce = true
+			} else if sum > target {
+				j--
+				needPlus = true
+			} else {
+				return arr[i],arr[k],arr[j],target
+			}
+		}
+		if needReduce {
+			k--
+		}
+		if needPlus {
+			j++
+		}
+		if getDistance(sumBest,target) > getDistance (sum,target) {
+			aBest,bBest,cBest,sumBest = arr[i],arr[k],arr[j],sum
+		}
+	}
+	return aBest,bBest,cBest,sumBest
+}
+func getDistance (a, target int64) int64 {
+	d := target-a
+	if d<0 {
+		return -d
+	}
+	return d
+}
+
+//数组的所有子集
+func GetAllSubset (nums []int64) [][]int64 {
+	res := [][]int64{}
+	standardNum := (1 << len(nums))-1
+	for i:=0; i<= standardNum;i++ {
+		tmp := []int64{}
+		for j := 0; j < len(nums);j++ {
+			if (i&(1<<j)) > 0 {
+				tmp = append(tmp,nums[j])
+			}
+		}
+		res = append(res, tmp)
+	}
+	return res
+}
+
+//todo 200.岛屿数量
+type point struct {
+	x,y int
+}
+func GetIsLandNum(intMap [][]int) int {
+	islandNum := 0
+	maxLine := len(intMap)-1
+	maxVolumn := len(intMap[0])-1
+	for i:=0; i<=maxLine;i++ {
+		for j:=0; j<= maxVolumn; j++ {
+			if intMap[i][j] == 1 {
+				islandNum ++
+				queue := tree.Queue{}
+				tmpPoint := point{
+					i,j,
+				}
+				queue.In(tmpPoint)
+				for !queue.IsEmpty() {
+					tmp := queue.Out()
+					curPoint := tmp.(point)
+					if intMap[curPoint.x][curPoint.y] == 0 {
+						continue
+					}
+					intMap[curPoint.x][curPoint.y] = 0
+					if curPoint.y != 0 {
+						tmpPoint := point{
+							curPoint.x,curPoint.y-1,
+						}
+						queue.In(tmpPoint)
+					}
+					if curPoint.y !=maxVolumn {
+						tmpPoint := point{
+							curPoint.x,curPoint.y+1,
+						}
+						queue.In(tmpPoint)
+					}
+					if curPoint.x != maxLine {
+						tmpPoint := point{
+							curPoint.x+1,j,
+						}
+						queue.In(tmpPoint)
+					}
+				}
+			}
+		}
+	}
+	return islandNum
+}
+
+//括号生成
+
+func GenerateParenthesis (target int) ([]string) {
+	res := &([]string{})
+	GenerateParenthesisDfs(0,target,'(',[]byte{},res)
+	return *res
+}
+func GenerateParenthesisDfs (n, target int,v byte, tmpByte []byte, res *[]string) {
+	tmpByte = append(tmpByte,v)
+	if n == target*2-1 {
+		if checkParenthesisValid(tmpByte) {
+			*res = append(*res, string(tmpByte))
+		}
+		return
+	}
+	GenerateParenthesisDfs (n+1, target,'(', tmpByte,res)
+	len:=len(tmpByte)
+	tmpByte = tmpByte[:len]
+	GenerateParenthesisDfs (n+1, target,')', tmpByte,res)
+}
+
+func checkParenthesisValid (tmpArr []byte) bool {
+	stack := tree.Stack{}
+	i:=0
+	for ;i<len(tmpArr);i++ {
+		if tmpArr[i] == '(' {
+			stack.Push('(')
+		} else {
+			if !stack.IsEmpty() {
+				v := stack.Pop()
+				testByte := byte(v.(int32))
+				if testByte != '(' {
+					return false
+				}
+			} else {
+				return false
+			}
+		}
+	}
+	if stack.IsEmpty() && i == len(tmpArr) {
+		return true
+	}
+	return false
+}
+
 
 
 

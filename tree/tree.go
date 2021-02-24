@@ -31,6 +31,9 @@ type Queue struct {
 func (q *Queue) in (val interface{}) {
 	q.arr = append(q.arr,val)
 }
+func (q *Queue) In (val interface{}) {
+	q.in(val)
+}
 
 func (q *Queue) IsEmpty () bool {
 	return len(q.arr) == 0
@@ -44,6 +47,9 @@ func (q *Queue) out () (val interface{})  {
 		q.arr = []interface{}{}
 	}
 	return
+}
+func (q *Queue) Out() (val interface{}) {
+	return q.out()
 }
 
 

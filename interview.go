@@ -234,6 +234,19 @@ func main() {
 	fmt.Println(fmt.Sprintf("min change num=%d", other.CoinChangeInMemo(coins,11)))
 	fmt.Println(fmt.Sprintf("min change num=%d", other.CoinChangeDp(coins,11)))
 	fmt.Println(fmt.Sprintf("longest upnum=%d", other.GetLongestUpNum([]int{10,9,2,5,3,7,101,18})))
+	a,b,c,sum1 := other.GetClosestThreeNumSum([]int64{-1,2,1,-4},1)
+	fmt.Println(fmt.Sprintf("closest a b c sum=%d,%d,%d,%d",a,b,c,sum1))
+	other.GetAllSubset([]int64{1,2,3})
+	other.GenerateParenthesis(3)
+	intMap := [][]int{
+		[]int{1,1,0,0,0},
+		[]int{1,1,0,0,0},
+		[]int{0,0,1,0,0},
+		[]int{0,0,0,1,1},
+	}
+	islandNum := other.GetIsLandNum(intMap)
+	fmt.Println(fmt.Sprintf("islandNum=%d",islandNum))
+
 }
 
 

@@ -206,7 +206,7 @@ func GetKthNumInTwoArr(arr1 []int64, arr2 []int64, k int) float64 {
 
 	return 0
 }
-
+//寻找峰值
 func FindPeek(arr []int) int {
 	left, right := 0, len(arr)-1
 
@@ -239,6 +239,31 @@ func FindPeek(arr []int) int {
 		}
 	}
 	return -1
+}
+// 查找唯一重复的数字
+/*给定一个包含n + 1 个整数的数组nums ，其数字都在 1 到 n之间（包括 1 和 n），可知至少存在一个重复的整数。
+
+假设 nums 只有 一个重复的整数 ，找出 这个重复的数 。
+二分法 + 抽屉原理
+*/
+func GetDupNumInArr (arr []int ) int {
+	left := 1
+	right := len(arr)-1
+	for left <= right {
+		mid :=  (left + right)/2
+		cnt := 0
+		for _,v:=range arr {
+			if v <= mid {
+				cnt ++
+			}
+		}
+		if cnt > mid {
+			left = mid + 1
+		} else {
+			right = mid-1
+		}
+	}
+	return left
 }
 
 
