@@ -502,6 +502,111 @@ func CatchRainQ (arr[]int) int {
 	}
 	return res
 }
+
+//柱状图中最大的矩形面积
+// 暴力解法
+// 1.枚举宽度 先枚举左边界，在左边界到右边界之间遍历左边界确定最小高度 计算面积
+// 2.枚举高度，遍历数组将每个元素作为矩形的高度，查看当以此为高度的时候面积最大是多少 找到左右第一个小于此高度的序列作为边界
+/*
+给定 n 个非负整数，用来表示柱状图中各个柱子的高度。每个柱子彼此相邻，且宽度为 1 。
+
+求在该柱状图中，能够勾勒出来的矩形的最大面积。
+ */
+
+func largestRectangleArea(heights []int) int {
+	maxArea := 0
+	for i:=0;i<len(heights);i++ {
+		var left,right = i,i
+
+		for ;left -1 >=0; {
+			if heights[left-1] >= heights[i] {
+				left --
+			} else {
+				break
+			}
+		}
+		for ;right +1 < len(heights); {
+			if heights[right+1] >= heights[i] {
+				right++
+			} else {
+				break
+			}
+		}
+		area := (right-left+1) * heights[i]
+		if area > maxArea {
+			maxArea = area
+		}
+	}
+	return maxArea
+}
+//单调栈解法
+type boarderItem struct {
+	Height int
+	index int
+}
+func largestRectangleAreaWithStack(heights []int) int {
+	maxArea := 0
+	stack := tree.Stack{}
+	leftBorderArr := make([]int,len(heights))
+	rightBoarderArr := make([]int,len(heights))
+
+	for i:= 0; i< len(heights);i++ {
+		tmpItem := boarderItem{}
+		tmpItem.Height = heights[i]
+		tmpItem.index = i
+		if stack.IsEmpty() {
+			leftBorderArr[i] = -1
+		} else {
+			for !stack.IsEmpty() {
+				v := stack.Pop()
+				item := v.(boarderItem)
+				if item.Height < heights[i] {
+					stack.Push(item)
+					stack.Push(tmpItem)
+					leftBorderArr[i] = item.index
+					break
+				}
+			}
+			if stack.IsEmpty() {
+				stack.Push(tmpItem)
+				leftBorderArr[i] = -1
+			}
+		}
+	}
+	stack = tree.Stack{}
+	for j:= len(heights)-1; j>=0 ;j++ {
+		tmpItem := boarderItem{}
+		tmpItem.Height = heights[j]
+		tmpItem.index = j
+		if stack.IsEmpty() {
+			rightBoarderArr[j] = len(heights)
+		} else {
+			for !stack.IsEmpty() {
+				v := stack.Pop()
+				item := v.(boarderItem)
+				if item.Height < heights[j] {
+					stack.Push(item)
+					stack.Push(tmpItem)
+					rightBoarderArr[j] = item.index
+					break
+				}
+			}
+			if stack.IsEmpty() {
+				stack.Push(tmpItem)
+				leftBorderArr[j] = len(heights)
+			}
+		}
+	}
+	for i:=0;i<len(heights);i++ {
+		area := (rightBoarderArr[i]-leftBorderArr[i]-1)*heights[i]
+		if area>maxArea{
+			maxArea= area
+		}
+	}
+	return  maxArea
+}
+
+
 /*
 * 获取数组除自己以外的元素的乘积，不能使用除法
 和接雨水相似，只不过接雨水是先找到左右两边的最大值在两个最大值中取最小，就是该节点能接的雨水
@@ -942,7 +1047,7 @@ func longestConsecutive(nums []int) int {
 }
 
 
-//柱状图中最大的矩形面积
+
 
 
 
