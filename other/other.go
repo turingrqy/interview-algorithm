@@ -3,7 +3,6 @@ package other
 import (
 	"fmt"
 	"math"
-	"renqiyang/interview/heap_sort"
 	"renqiyang/interview/tree"
 	"strconv"
 )
@@ -123,21 +122,10 @@ func GetUpstairsWaysNum (k int) int {
 
 	return GetUpstairsWaysNum(k-1) + GetUpstairsWaysNum(k-2)
 }
-//最大子序列和
-func GetMaxSumInArray(arr []int64) int64 {
-	maxSum :=arr[0]
-	sum := int64(0)
-	for i:=0;i< len(arr);i++ {
-		sum += arr[i]
-		if sum > maxSum {
-			maxSum = sum
-		}
-		if sum < 0 {
-			sum = 0
-		}
-	}
-	return maxSum
-}
+
+
+//
+
 var numMap = map[byte]bool{
 	'1':true,
 	'2':true,
@@ -294,7 +282,7 @@ func SingleNumInArr (arr []int) int {
 }
 //全排列
 //深度优先遍历 树
-// 一个保存已选择数组的栈 path,搜索树的深度 depth，已经选择的map
+// 一个保存已选择数组的栈 path,搜索树的深度 depth，已经选择的map map 保证不能选已经选过的
 func Permute(nums []int) *[][]int {
 	path := []int{}
 	depth := 0
@@ -351,38 +339,7 @@ func CoinChangeDFS (coins []int, amount int, depth int, minDepth *int) {
 	}
 }
 
-//从上面看我们深度遍历中有很多无用的遍历，我们可以事先记录 n 块钱最少需要的钱币的数目 memo 记录n元钱 最少需要几步
-//自顶向下 记忆迭代
-func CoinChangeInMemo(coins []int, amount int) int {
-	memo := make([]int, amount)
-	return CoinChangeDFSInMemo(coins, amount, &memo)
-}
-func CoinChangeDFSInMemo (coins []int, amount int, memo *[]int) int {
-	if amount == 0 {
-		return 0
-	}
 
-	if amount < 0 {
-		return -1
-	}
-	if (*memo)[amount-1] != 0 {
-		return (*memo)[amount-1]
-	}
-
-	var minStep = math.MaxInt32
-	for i := 0; i < len(coins);i++ {
-		res := CoinChangeDFSInMemo(coins,amount-coins[i], memo)
-		if res >=0 && res < minStep {
-			minStep= res+1
-		}
-	}
-	if minStep == math.MaxInt32 {
-		(*memo)[amount-1] = -1
-	} else {
-		(*memo)[amount-1] = minStep
-	}
-	return (*memo)[amount-1]
-}
 //动态规划自底向上
 func CoinChangeDp(coins []int, amount int) int {
 	memo := make([]int, amount+1)
@@ -402,6 +359,83 @@ func CoinChangeDp(coins []int, amount int) int {
 
 	return memo[amount]
 }
+//还有一种是求组合数
+
+
+
+//给定一个元素不重复的数组，找出所有和为target的组合
+/*所有数字（包括 target）都是正整数。和选硬币是一样的 这个就是求所有的组合
+解集不能包含重复的组合，求所有组合只能是递归了 求组合数可以用背包*/
+//可以每次都选择是使用下一个还是当前的方法
+func FindCombineSumEqTarget (arr[]int, target int) [][]int {
+	res := &[][]int{}
+	tmpArr := []int{}
+	FindCombineSumEqTargetDFS(arr,target,tmpArr, 0,res)
+	return *res
+}
+
+func FindCombineSumEqTargetDFS (arr[]int, target int ,tmpArr []int, idx int, res *[][]int) {
+	if target == 0 {
+		//终止条件 找到了一个组合
+		tmpRes := []int{}
+		tmpRes = append(tmpRes, tmpArr...)
+		*res = append(*res,tmpRes)
+		return
+	}
+	if idx == len(arr) {
+		//候选集被选完了
+		return
+	}
+
+	/*这里并不是每次从头开始选了，从idx 初先选
+	for i:=0;i<len(arr);i++ {
+		tmpArr = append(tmpArr, arr[i])
+		FindCombineSumEqTargetDFS (arr, target-arr[i], tmpArr, res)
+		tmpArr = tmpArr[:len(tmpArr)-1]
+	}*/
+	//下一次从下一个数开始选
+	// 不取当前的数 取下一个数
+	FindCombineSumEqTargetDFS (arr, target, tmpArr, idx+1, res)
+	if target-arr[idx] >=0 {
+		tmpArr = append(tmpArr, arr[idx])
+		//
+		FindCombineSumEqTargetDFS (arr, target-arr[idx], tmpArr, idx, res)
+		tmpArr = tmpArr[:len(tmpArr)-1]
+	}
+}
+
+
+/*最小路劲和
+还是回朔法给定一个包含非负整数的 m x n 网格 grid ，请找出一条从左上角到右下角的路径，使得路径上的数字总和为最小。
+dp 计算到每格的最小和,回朔法也是ok的
+ */
+func GetMinRoadSumGrid (arr[][]int, rows,col int) (minSum int) {
+	for i:=0;i<rows;i++ {
+		for j:=0;j<col;j++ {
+			if i==0 && j==0 {
+				continue
+			}
+			if i==0 {
+				arr[0][j] = arr[0][j-1]+arr[0][j]
+				continue
+			}
+			if j==0 {
+				arr[i][0] = arr[i-1][0]+arr[i][0]
+				continue
+			}
+			min := 0
+			if arr[i-1][j] < arr[i][j-1] {
+				min = arr[i-1][j]
+			} else {
+				min = arr[i][j-1]
+			}
+			arr[i][j] =min+arr[i][j]
+		}
+	}
+	minSum = arr[rows-1][col-1]
+	return
+}
+
 
 
 /*输入：height = [0,1,0,2,1,0,1,3,2,1,2,1]
@@ -468,6 +502,31 @@ func CatchRainQ (arr[]int) int {
 	}
 	return res
 }
+/*
+* 获取数组除自己以外的元素的乘积，不能使用除法
+和接雨水相似，只不过接雨水是先找到左右两边的最大值在两个最大值中取最小，就是该节点能接的雨水
+这个题是先计算 左边的乘积在计算右边的乘积
+ */
+
+func MultiExceptself (arr[]int) []int {
+	multiLeft := make([]int, len(arr),len(arr))
+	multiRight := make([]int, len(arr),len(arr))
+	multiLeft[0] = 1
+	multiRight[len(arr)-1] = 1
+	for i:=1; i< len(arr);i++ {
+		multiLeft[i] =  multiLeft[i-1] * arr[i]
+	}
+
+	for j:= len(arr)-2;j>0;j-- {
+		multiRight[j] = multiRight[j+1] * arr[j]
+	}
+
+	res := make([]int, len(arr),len(arr))
+	for i:=0; i< len(arr);i++ {
+		res[i] = multiLeft[i] * multiRight[i]
+	}
+	return res
+}
 
 //买股票
 func buyStokToMax(arr []int) int {
@@ -485,7 +544,7 @@ func buyStokToMax(arr []int) int {
 	return maxProfit
 }
 
-//获取最长递增子序列的长度 递归
+//获取最长递增子序列 位置和顺序和原数组相同长度 递归
 func GetLongestUpNum(arr []int) int {
 	return GetLongestUpNumNormal(arr, len(arr)-1)
 }
@@ -524,52 +583,6 @@ func GetLongestUpInMemo(arr []int, i int, dp *[]int) int {
 	return (*dp)[i]
 }
 
-/*
-给定一个整数数组找到3个数的和最接近于target
- */
-func GetClosestThreeNumSum(arr []int64, target int64) (a,b,c,sum int64) {
-	//1.先排序
-	//2.遍历选择第一个数据a
-	heap_sort.HeapSort(arr)
-	var aBest,bBest,cBest,sumBest int64
-	sumBest = math.MinInt64
-	for i:= 0; i< len(arr)-2;i++ {
-		k := i+1
-		j := len(arr)-1
-		needReduce := false
-		needPlus := false
-		sum := int64(0)
-		for k<j {
-			sum = arr[i] + arr[k] + arr[j]
-			if  sum < target {
-				k++
-				needReduce = true
-			} else if sum > target {
-				j--
-				needPlus = true
-			} else {
-				return arr[i],arr[k],arr[j],target
-			}
-		}
-		if needReduce {
-			k--
-		}
-		if needPlus {
-			j++
-		}
-		if getDistance(sumBest,target) > getDistance (sum,target) {
-			aBest,bBest,cBest,sumBest = arr[i],arr[k],arr[j],sum
-		}
-	}
-	return aBest,bBest,cBest,sumBest
-}
-func getDistance (a, target int64) int64 {
-	d := target-a
-	if d<0 {
-		return -d
-	}
-	return d
-}
 
 //数组的所有子集
 func GetAllSubset (nums []int64) [][]int64 {
@@ -680,6 +693,258 @@ func checkParenthesisValid (tmpArr []byte) bool {
 	}
 	return false
 }
+/*
+给你一个字符串 s 、一个字符串 t 。返回 s 中涵盖 t 所有字符的最小子串。如果 s 中不存在涵盖 t 所有字符的子串，则返回空字符串 "" 。
+
+注意：如果 s 中存在这样的子串，我们保证它是唯一的答案。
+
+来源：力扣（LeetCode）
+链接：https://leetcode-cn.com/problems/minimum-window-substring
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。
+*/
+func MinWindow(s string, t string) string {
+	charactorCursorMap := map[byte]int{}
+	charactorPosition := map[byte][]int{}
+
+
+	for i:=0; i< len(t);i++ {
+		charactorCursorMap[t[i]] =0
+		charactorPosition[t[i]] = []int{}
+	}
+	for i:=0; i< len(s);i++ {
+		if _,ok:=charactorPosition[s[i]]; ok{
+			charactorPosition[s[i]] = append(charactorPosition[s[i]], i)
+		}
+	}
+	/*shortest := math.MaxInt32
+	for _,v:=range charactorPosition {
+		if len(v) < shortest {
+			shortest = len(v)
+		}
+	}*/
+	var minPosByte byte = t[0]
+	needMvCursor := -1
+	var mindistance = math.MaxInt32
+	resPosStart,resPosEnd := 0,0
+	for needMvCursor +1 < len(charactorPosition[minPosByte]) {
+		charactorCursorMap[minPosByte] = needMvCursor +1
+		minPos := math.MaxInt32
+		maxPos := math.MinInt32
+		for k,cur := range charactorCursorMap {
+			if charactorPosition[k][cur] > maxPos {
+				maxPos = charactorPosition[k][cur]
+			}
+			if charactorPosition[k][cur] < minPos {
+				minPos = charactorPosition[k][cur]
+				minPosByte = k
+				needMvCursor = cur
+			}
+		}
+		distance := maxPos - minPos
+		if distance <mindistance {
+			mindistance = distance
+			resPosStart = minPos
+			resPosEnd = maxPos
+		}
+	}
+
+	return s[resPosStart:resPosEnd+1]
+}
+
+/*给定一个 n × n 的二维矩阵 matrix 表示一个图像。请你将图像顺时针旋转 90 度。
+
+你必须在 原地 旋转图像，这意味着你需要直接修改输入的二维矩阵。请不要 使用另一个矩阵来旋转图像。
+
+来源：力扣（LeetCode）
+链接：https://leetcode-cn.com/problems/rotate-image
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。*/
+func RotateMatrix(matrix [][]int)  {
+	n := len(matrix)
+	for i:= 0; i< n/2; i++ {
+		for j:= 0; j< n;j++ {
+			matrix[i][j],matrix[n-i-1][j] = matrix[n-i-1][j],matrix[i][j]
+		}
+	}
+	for i:=0;i<n;i++ {
+		for j:=i;j<n;j++ {
+			matrix[i][j],matrix[j][i] = matrix[j][i],matrix[i][j]
+		}
+	}
+}
+
+//下一个排列
+/*实现获取 下一个排列 的函数，算法需要将给定数字序列重新排列成字典序中下一个更大的排列。
+
+如果不存在下一个更大的排列，则将数字重新排列成最小的排列（即升序排列）。
+
+必须 原地 修改，只允许使用额外常数空间。
+
+
+
+来源：力扣（LeetCode）
+链接：https://leetcode-cn.com/problems/next-permutation
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。
+ */
+func GetNextSeq (arr []int) {
+	var j = len(arr)-2
+	for ;j>=0;j-- {
+		if arr[j+1] < arr[j] {
+			continue
+		} else {
+			break
+		}
+	}
+	if j>=0 {
+		//需要将较小数和较大数交换
+		for i:=len(arr)-1;i>=(j+1);i-- {
+			if arr[i] > arr[j] {
+				arr[i],arr[j] = arr[j],arr[i]
+				break
+			}
+		}
+	}
+	//重新修改为正序
+	var low = j+1
+	var high = len(arr)-1
+	for low < high {
+		arr[low],arr[high] = arr[high],arr[low]
+	}
+}
+
+//目标和
+/*
+给定一个非负整数数组，a1, a2, ..., an, 和一个目标数，S。现在你有两个符号 + 和 -。对于数组中的任意一个整数，你都可以从 + 或 -中选择一个符号添加在前面。
+
+返回可以使最终数组和为目标数 S 的所有添加符号的方法数。
+
+来源：力扣（LeetCode）
+链接：https://leetcode-cn.com/problems/target-sum
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。
+*/
+func findTargetSumWays(nums []int, S int) int {
+	res := 0
+	findTargetSumWaysDfs(nums, 0, S, 0, &res)
+	return res
+}
+//depth 控制选几次，内部的递归循环控制每次有几种选择
+func findTargetSumWaysDfs(nums []int, sum int, target ,depth int,ways *int) {
+	if depth == len(nums) {
+		if sum == target {
+			*ways++
+		}
+		return
+	}
+	//两次选择
+	sum += nums[depth]
+	findTargetSumWaysDfs(nums, sum, target,depth+1,ways)
+	sum -= nums[depth]
+	sum -= nums[depth]
+	findTargetSumWaysDfs(nums, sum, target,depth+1,ways)
+	sum += nums[depth]
+}
+
+// 不同路径
+/*一个机器人位于一个 m x n 网格的左上角 （起始点在下图中标记为“Start” ）。
+
+机器人每次只能向下或者向右移动一步。机器人试图达到网格的右下角（在下图中标记为“Finish”）。
+如果有障碍
+
+来源：力扣（LeetCode）
+链接：https://leetcode-cn.com/problems/unique-paths-ii
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。
+GetRobotWaysGridDp 动态规划
+GetRobotWaysGridDFS 回溯法
+*/
+
+func uniquePathsWithObstacles(obstacleGrid [][]int) int {
+	return uniquePathsWithObstaclesDp(obstacleGrid)
+}
+
+func uniquePathsWithObstaclesDp (obstacleGrid [][]int) int {
+	ways := make([][]int,len(obstacleGrid))
+	for i:=0;i<len(ways);i++ {
+		ways[i] = make([]int,len(obstacleGrid[0]))
+	}
+	ways[0][0] = 1
+	for i:=0;i<len(ways);i++ {
+		for j:=0;j<len(ways[0]);j++ {
+			if i == 0 && j==0 {
+				ways[i][j] = 1
+			}else if i == 0 {
+				if obstacleGrid[i][j] == 1 {
+					ways[i][j] = 0
+				} else {
+					ways[i][j] = ways[i][j-1]
+				}
+			} else if j==0 {
+				if obstacleGrid[i][j] == 1 {
+					ways[i][j] = 0
+				} else {
+					ways[i][j] = ways[i-1][j]
+				}
+			} else {
+				if obstacleGrid[i][j] == 1 {
+					ways[i][j] = 0
+				} else {
+					ways[i][j] = ways[i-1][j] + ways[i][j-1]
+				}
+			}
+		}
+	}
+	return ways[len(ways)-1][len(ways[0])-1]
+}
+
+func uniquePathsWithObstaclesDFS(obstacleGrid [][]int, curRow,curCol int, ways *int) {
+	if curRow == len(obstacleGrid)-1 && curCol == len(obstacleGrid[0])-1 {
+		//走完了 更新方法+1
+		*ways = *ways+1
+		return
+	}
+	if obstacleGrid[curRow][curCol] == 1 {
+		//遇到路障
+		return
+	}
+	if curRow+1 < len(obstacleGrid) {
+		uniquePathsWithObstaclesDFS(obstacleGrid,curRow+1,curCol,ways)
+	}
+	if curCol+1 < len(obstacleGrid[0]) {
+		uniquePathsWithObstaclesDFS(obstacleGrid,curRow,curCol+1,ways)
+	}
+}
+
+//最长连续序列，不要求在数组中连续
+// 可以先进行排序再搜索连续序列
+// O(n)的算法
+func longestConsecutive(nums []int) int {
+	setMap := make(map[int]bool)
+	max := 0
+	for i:=0;i<len(nums);i++ {
+		setMap[nums[i]] = true
+	}
+
+	for i:=0;i<len(nums);i++ {
+		if _,ok := setMap[nums[i]-1];!ok {
+			currentNum := nums[i]
+			count := 1
+			for {
+				if _,ok:=setMap[currentNum+1];!ok {
+					break
+				}
+				currentNum++
+				count++
+			}
+			if count>max{
+				max = count
+			}
+		}
+	}
+	return max
+}
+
+
+//柱状图中最大的矩形面积
+
+
 
 
 

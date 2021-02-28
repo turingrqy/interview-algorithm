@@ -214,6 +214,28 @@ func WideOrderTree (root *TreeNode) {
 		}
 	}
 }
+//二叉树右视图，层序遍历
+func GetTreeRightView(root *TreeNode) []int64 {
+	tmpArr := []*TreeNode{}
+	tmpArr = append(tmpArr, root)
+	resArr := []int64{}
+	for len(tmpArr)>0 {
+		resArr = append(resArr,tmpArr[len(tmpArr)-1].Value)
+		curTmpArr := []*TreeNode{}
+		for i:=0;i<len(tmpArr);i++ {
+			if tmpArr[i].Left != nil {
+				curTmpArr = append(curTmpArr,tmpArr[i].Left)
+			}
+			if tmpArr[i].Right != nil {
+				curTmpArr = append(curTmpArr,tmpArr[i].Right)
+			}
+		}
+		tmpArr = curTmpArr
+	}
+	return resArr
+}
+
+
 
 func GetHeight (root *TreeNode) int {
 	if root == nil {
@@ -813,19 +835,19 @@ func GetMaxSumFromRoot (root *TreeNode) int64 {
 	}
 
 	maxSum := int64(0)
-	NodeMaxGain(root, &maxSum)
+	NodeMaxGainFromRoot(root, &maxSum)
 	return maxSum
 }
-
+//最大路径和不只是
 func NodeMaxGainFromRoot (root *TreeNode, maxSum *int64) int64 {
 	if root == nil {
 		return 0
 	}
-	maxGainLeft := NodeMaxGain(root.Left, maxSum)
+	maxGainLeft := NodeMaxGainFromRoot(root.Left, maxSum)
 	if maxGainLeft < 0 {
 		maxGainLeft = 0
 	}
-	maxGainRight := NodeMaxGain(root.Left, maxSum)
+	maxGainRight := NodeMaxGainFromRoot(root.Right, maxSum)
 	if maxGainRight < 0 {
 		maxGainRight = 0
 	}
@@ -834,6 +856,67 @@ func NodeMaxGainFromRoot (root *TreeNode, maxSum *int64) int64 {
 		*maxSum = newSum
 	}
 	return newSum
+}
+
+//二叉树是否存在一个路径和==target的路径s
+func HasPathSum(root *TreeNode, targetSum int) bool {
+	return HasPathSumDFS(root,targetSum,0)
+}
+
+func HasPathSumDFS (root *TreeNode, targetSum int, sum int) bool {
+	if root == nil {
+		return false
+	}
+	sum += int(root.Value)
+	if sum == targetSum {
+		return true
+	}
+	hasLeft := HasPathSumDFS(root.Left, targetSum, sum)
+	hasRight := HasPathSumDFS(root.Right, targetSum, sum)
+	sum -= int(root.Value)
+	return hasLeft||hasRight
+}
+
+func CountCompleteNodes(root *TreeNode) int {
+	level := 0
+	tmpRoot := root
+	for tmpRoot!= nil {
+		level++
+		tmpRoot = tmpRoot.Left
+	}
+	//level 是二叉树的层数，则整颗二叉树在2^(n-1)~2^n-1
+	low := 1<<(level-1)
+	high := (1<<level)-1
+	var ans = 0
+	for low <=high {
+		mid := (low+high)/2
+		if isExistInCompeleteTree(root,level,mid) {
+			low = mid +1
+			ans = mid
+		} else {
+			high = mid-1
+		}
+	}
+	return ans
+}
+func isExistInCompeleteTree (root *TreeNode, level,k int) bool {
+	testNum := 1<<(level-1)
+	tmpRoot := root
+	for i:=0;i<level-1;i++ {
+		testNum = testNum >> 1
+		if tmpRoot == nil {
+			break
+		}
+		if (k &testNum) > 0 {
+			tmpRoot = tmpRoot.Right
+		} else {
+			tmpRoot = tmpRoot.Left
+		}
+	}
+	if tmpRoot == nil {
+		return false
+	}
+	return true
 }
 
 

@@ -1,5 +1,31 @@
 package binary_search
 
+import (
+	"math"
+	"renqiyang/interview/heap_sort"
+)
+//二维排序数组查找1 下一行第一个元素大于上一行最后一个元素
+//将二维数组看成一维排序数组，line =index/3 col index%3-1
+func FindInTwoDimensionStrictSorted(arr[][]int, target int) (int,int) {
+	return -1,-1
+}
+//二维排序数组查找2
+func FindInTwoDimensionSorted(arr[][]int, target int) (int,int) {
+	startRow := len(arr)-1
+	startCol := 0
+	maxCol := len(arr[0])-1
+	for startRow >=0 && startCol <=maxCol {
+		if arr[startRow][startCol] > target {
+			startRow--
+		} else if arr[startRow][startCol] < target {
+			startCol++
+		} else {
+			return startRow,startCol
+		}
+	}
+	return -1,-1
+}
+
 //排序数组要想到二分查找
 
 func BinarySearch (arr []int64, lookFor int64) int {
@@ -137,7 +163,7 @@ func getDpBinarySearch(arr []int64, target int64) int {
 	}
 	return -1
 }
-
+// 最长递增子序列顺序和位置要求和子数组相同
 func GetLongestUpSubArr (arr []int64) [][]int64 {
 	dp := make([][]int64,len(arr))
 	en := []int64{}
@@ -246,9 +272,10 @@ func FindPeek(arr []int) int {
 假设 nums 只有 一个重复的整数 ，找出 这个重复的数 。
 二分法 + 抽屉原理
 */
-func GetDupNumInArr (arr []int ) int {
+func GetOnceDupNumInArr (arr []int ) int {
 	left := 1
 	right := len(arr)-1
+	var ans int
 	for left <= right {
 		mid :=  (left + right)/2
 		cnt := 0
@@ -257,16 +284,85 @@ func GetDupNumInArr (arr []int ) int {
 				cnt ++
 			}
 		}
-		if cnt > mid {
+		if cnt <= mid {
 			left = mid + 1
 		} else {
 			right = mid-1
+			ans = mid
 		}
 	}
-	return left
+	return ans
 }
 
+/*
+给定一个整数数组找到3个数的和最接近于target
+*/
+func GetClosestThreeNumSum(arr []int64, target int64) (a,b,c,sum int64) {
+	//1.先排序
+	//2.遍历选择第一个数据a
+	heap_sort.HeapSort(arr)
+	var aBest,bBest,cBest,sumBest int64
+	sumBest = math.MinInt64
+	for i:= 0; i< len(arr)-2;i++ {
+		k := i+1
+		j := len(arr)-1
+		needReduce := false
+		needPlus := false
+		sum := int64(0)
+		for k<j {
+			sum = arr[i] + arr[k] + arr[j]
+			if  sum < target {
+				k++
+				needReduce = true
+			} else if sum > target {
+				j--
+				needPlus = true
+			} else {
+				return arr[i],arr[k],arr[j],target
+			}
+		}
+		if needReduce {
+			k--
+		}
+		if needPlus {
+			j++
+		}
+		if getDistance(sumBest,target) > getDistance (sum,target) {
+			aBest,bBest,cBest,sumBest = arr[i],arr[k],arr[j],sum
+		}
+	}
+	return aBest,bBest,cBest,sumBest
+}
+func getDistance (a, target int64) int64 {
+	d := target-a
+	if d<0 {
+		return -d
+	}
+	return d
+}
 
+// x的平方根 二分查找
+func GetSqrt(x int) int {
+	low := 1
+	high := x
+	var ans int
+	for low<=high {
+		mid := (low+high)/2
+		if mid * mid > x {
+			high = mid-1
+		} else if mid * mid < x  {
+			ans = mid
+			low = mid+1
+
+		} else {
+			return mid
+		}
+	}
+	return ans
+}
+
+//完全2叉树几点数量，直接遍历二叉树是o(n)的操作
+//使用的完全二叉树的性质和二分查找计算节点个数
 
 
 

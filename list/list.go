@@ -428,3 +428,5 @@ func mergeTwoSortedList(head1 *ListNode, head2 *ListNode) *ListNode {
 }
 
 
+//旋转链表
+

@@ -2,9 +2,11 @@ package main
 
 import (
 	"fmt"
+	"renqiyang/interview/begpack"
 	"renqiyang/interview/binary_search"
 	"renqiyang/interview/list"
 	"renqiyang/interview/other"
+	"renqiyang/interview/recursion_dynamic"
 )
 
 func main() {
@@ -231,10 +233,9 @@ func main() {
 	fmt.Println(maxRain)
 	coins := []int{1, 2, 5}
 	fmt.Println(fmt.Sprintf("min change num=%d", other.CoinChangeNormal(coins,11)))
-	fmt.Println(fmt.Sprintf("min change num=%d", other.CoinChangeInMemo(coins,11)))
 	fmt.Println(fmt.Sprintf("min change num=%d", other.CoinChangeDp(coins,11)))
 	fmt.Println(fmt.Sprintf("longest upnum=%d", other.GetLongestUpNum([]int{10,9,2,5,3,7,101,18})))
-	a,b,c,sum1 := other.GetClosestThreeNumSum([]int64{-1,2,1,-4},1)
+	a,b,c,sum1 := binary_search.GetClosestThreeNumSum([]int64{-1,2,1,-4},1)
 	fmt.Println(fmt.Sprintf("closest a b c sum=%d,%d,%d,%d",a,b,c,sum1))
 	other.GetAllSubset([]int64{1,2,3})
 	other.GenerateParenthesis(3)
@@ -246,6 +247,31 @@ func main() {
 	}
 	islandNum := other.GetIsLandNum(intMap)
 	fmt.Println(fmt.Sprintf("islandNum=%d",islandNum))
+	singleDup := binary_search.GetOnceDupNumInArr([]int{1,3,4,2,2})
+	fmt.Println(fmt.Sprintf("single dup=%d",singleDup))
+	//other.FindCombineSumEqTarget([]int{2,3,6,7}, 7)
+	resDFS := other.FindCombineSumEqTarget([]int{2,3,6,7}, 7)
+	fmt.Println("组合综合 dfs=", resDFS)
+	resDp := begpack.GetCombineSumEqTargetDp([]int{2,3,6,7}, 7)
+	fmt.Println("组合综合 dp=", resDp)
+	minSum:=other.GetMinRoadSumGrid([][]int{
+		[]int{1,3,1},
+		[]int{1,1,5},
+		[]int{4,2,1},
+	},3,3)
+	fmt.Println(fmt.Sprintf("minRoadSum=%d",minSum))
+	resrow,resCol := binary_search.FindInTwoDimensionSorted([][]int{
+		[]int{1,4,7,11,15},
+		[]int{2,5,8,12,19},
+		[]int{3,6,9,16,22},
+		[]int{10,13,14,17,24},
+		[]int{18,21,23,26,30},
+	},5)
+	fmt.Println(fmt.Sprintf("resrow=%d resCol=%d",resrow,resCol))
+	resMax := recursion_dynamic.GetMaxMulti([]int{-2,0,-1})
+	fmt.Println(fmt.Sprintf("resMax=%d",resMax))
+	newstr := other.MinWindow("ADOBECODEBANC", "ABC")
+	fmt.Println(fmt.Sprintf("newstr=%s",newstr))
 
 }
 
