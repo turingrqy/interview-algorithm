@@ -138,7 +138,7 @@ func GetMinInRatateOrder (arr []int64, low, high int) int {
 	return index
 }
 
-func getDpBinarySearch(arr []int64, target int64) int {
+/*func getDpBinarySearch(arr []int64, target int64) int {
 	low := 0;
 	high := len(arr)-1
 
@@ -163,7 +163,7 @@ func getDpBinarySearch(arr []int64, target int64) int {
 	}
 	return -1
 }
-// 最长递增子序列顺序和位置要求和子数组相同
+// 最长递增子序列顺序和位置要求和子数组相同 更好的解法在动态规划中
 func GetLongestUpSubArr (arr []int64) [][]int64 {
 	dp := make([][]int64,len(arr))
 	en := []int64{}
@@ -180,7 +180,7 @@ func GetLongestUpSubArr (arr []int64) [][]int64 {
 	}
 
 	return dp
-}
+}*/
 //两个递增数组找到两个数组中的中位数
 //log(m+n) log 一般都要想到二分查找
 func GetMidIntwosortedArr(arr1 []int64, arr2 []int64) float64 {
@@ -361,8 +361,7 @@ func GetSqrt(x int) int {
 	return ans
 }
 
-//完全2叉树几点数量，直接遍历二叉树是o(n)的操作
-//使用的完全二叉树的性质和二分查找计算节点个数
+
 
 
 

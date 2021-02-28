@@ -649,7 +649,7 @@ func buyStokToMax(arr []int) int {
 	return maxProfit
 }
 
-//获取最长递增子序列 位置和顺序和原数组相同长度 递归
+/*//获取最长递增子序列 位置和顺序和原数组相同长度 递归
 func GetLongestUpNum(arr []int) int {
 	return GetLongestUpNumNormal(arr, len(arr)-1)
 }
@@ -686,7 +686,7 @@ func GetLongestUpInMemo(arr []int, i int, dp *[]int) int {
 	}
 	(*dp)[i] = max
 	return (*dp)[i]
-}
+}*/
 
 
 //数组的所有子集

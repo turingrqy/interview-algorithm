@@ -234,7 +234,7 @@ func main() {
 	coins := []int{1, 2, 5}
 	fmt.Println(fmt.Sprintf("min change num=%d", other.CoinChangeNormal(coins,11)))
 	fmt.Println(fmt.Sprintf("min change num=%d", other.CoinChangeDp(coins,11)))
-	fmt.Println(fmt.Sprintf("longest upnum=%d", other.GetLongestUpNum([]int{10,9,2,5,3,7,101,18})))
+	//fmt.Println(fmt.Sprintf("longest upnum=%d", other.GetLongestUpNum([]int{10,9,2,5,3,7,101,18})))
 	a,b,c,sum1 := binary_search.GetClosestThreeNumSum([]int64{-1,2,1,-4},1)
 	fmt.Println(fmt.Sprintf("closest a b c sum=%d,%d,%d,%d",a,b,c,sum1))
 	other.GetAllSubset([]int64{1,2,3})
@@ -272,7 +272,8 @@ func main() {
 	fmt.Println(fmt.Sprintf("resMax=%d",resMax))
 	newstr := other.MinWindow("ADOBECODEBANC", "ABC")
 	fmt.Println(fmt.Sprintf("newstr=%s",newstr))
-
+	recursion_dynamic.GetNumberofLIS([]int{1,3,5,4,7,6})
+	recursion_dynamic.GetLongetLIS([]int{1,3,5,4,7,6})
 }
 
 

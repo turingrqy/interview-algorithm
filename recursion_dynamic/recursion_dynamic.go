@@ -72,3 +72,115 @@ func GetMaxMulti(arr []int) int {
 	}
 	return maxRes
 }
+
+func GetMaxLengthOfLIS(nums []int) int {
+	dp := make([]int, len(nums))
+	dp[0] =1
+	for i:=1;i<len(nums);i++ {
+		max := 1
+		for j:= 0;j<i;j++ {
+			if nums[i]>nums[j] {
+				tmpMax := dp[j] + 1
+				if tmpMax > max {
+					max = tmpMax
+				}
+			}
+		}
+		dp[i] = max
+	}
+	max := 0
+	for i:=0;i<len(dp);i++ {
+		if dp[i] > max {
+			max = dp[i]
+		}
+	}
+	return max
+}
+func GetNumberofLIS (nums []int) int {
+	dp := make([]int, len(nums))
+	dp[0] =1
+	counts := make([]int, len(nums))
+	counts[0]=1
+	for i:=1;i<len(nums);i++ {
+		max := 1
+		counts[i] = 1
+		for j:= 0;j<i;j++ {
+			if nums[i]>nums[j] {
+				tmpMax := dp[j] + 1
+				if tmpMax > max {
+					max = tmpMax
+					counts[i] = counts[j]
+				} else if tmpMax==max {
+					counts[i] += counts[j]
+				}
+			}
+		}
+		dp[i] = max
+	}
+	maxCount := 0
+	maxLen := 0
+	for i:=0;i<len(dp);i++ {
+		if dp[i] > maxLen {
+			maxLen = dp[i]
+			maxCount= counts[i]
+		} else if dp[i] == maxLen {
+			maxCount+= counts[i]
+		}
+	}
+	return maxCount
+}
+
+func GetLongetLIS (nums []int) [][]int {
+	dp := make([]int,len(nums))
+	lisArr := make([][][]int, len(nums))
+	lisArr[0] = make([][]int, 1)
+	lisArr[0][0] = []int{nums[0]}
+
+	for i:= 0; i< len(nums);i++ {
+		max := 1
+		var maxIndex []int
+		for j:= 0; j<i;j++ {
+			if nums[i] > nums[j] {
+				tmpMax := dp[j]+1
+				if tmpMax > max {
+					max = tmpMax
+					maxIndex = []int{}
+					maxIndex = append(maxIndex,j)
+				} else if tmpMax== max{
+					maxIndex = append(maxIndex,j)
+				}
+			}
+		}
+		dp[i] = max
+		if len(maxIndex) > 0 {
+			lisArr[i] = [][]int{}
+			for _,index := range maxIndex {
+				for _,arr := range lisArr[index] {
+					tmpArr := []int{}
+					tmpArr = append(tmpArr, arr...)
+					tmpArr = append(tmpArr, nums[i])
+					lisArr[i] = append(lisArr[i],tmpArr)
+				}
+			}
+		} else {
+			lisArr[i] = make([][]int, 1)
+			lisArr[i][0] = []int{nums[i]}
+		}
+	}
+	maxLen:=0
+	var maxIndex []int
+	for i:=0;i<len(lisArr);i++ {
+		if dp[i] > maxLen {
+			maxLen = dp[i]
+			maxIndex = []int{}
+			maxIndex = append(maxIndex, i)
+		} else {
+			maxIndex = append(maxIndex, i)
+		}
+	}
+	res := [][]int{}
+	for _,index :=range maxIndex {
+		res = append(res,lisArr[index]...)
+	}
+	return res
+}
