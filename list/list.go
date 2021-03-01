@@ -114,6 +114,20 @@ func GetMidInList (head *ListNode) *ListNode {
 	return first
 }
 
+// 判断链表是否有环，快慢指针，如果快指针比慢指针差一步则下一次迭代两者会相遇，当差两步一次迭代后会变成差一步再次迭代相遇 2不当差3步的时候
+// 一次迭代两者变成差两步在迭代差一步，在迭代相遇一次类推永远会相遇
+/*
+2.求有环单链表的环长
+
+ 　　在环上相遇后，记录第一次相遇点为Pos，之后指针slow继续每次走1步，fast每次走2步。在下次相遇的时候fast比slow正好又多走了一圈，也就是多走的距离等于环长。
+
+　　设从第一次相遇到第二次相遇，设slow走了len步，则fast走了2*len步，相遇时多走了一圈：
+
+　　　　环长=2*len-len。
+	这个也很好理解，从环上相同的点出发，快指针走完一圈 满指针才走完半圈 len/2 满指针在走半圈，正好走完一圈，此时快指针也刚好走完一圈，两者
+再次在之前的点相遇，此时走的迭代的次数就是环形的长度
+ */
+
 func GetRingLen (head *ListNode) int {
 	first := head
 	second := head
@@ -138,6 +152,14 @@ func GetRingLen (head *ListNode) int {
 	}
 	return len
 }
+/*
+第一次相遇时，slow走的长度 S = LenA + x;
+
+　　　　第一次相遇时，fast走的长度 2S = LenA + n*R + x;
+
+　　　　所以可以知道，LenA + x =  n*R;　　LenA = n*R -x;
+      所以 在第一次相遇后，两个指针分别从pos 和head 每次走一步 两者会在n*R -x 处再次相遇就是入口点
+ */
 
 func GetEnterNodeInRing (head *ListNode) *ListNode {
 	first := head
@@ -319,7 +341,7 @@ func ReversePartList (head *ListNode, from,to int64) *ListNode {
 	return head
 }
 
-//两数相加
+//两个倒序组成链表的
 func SumTwoList (l1 *ListNode, l2 *ListNode) *ListNode {
 	var head *ListNode
 	var tail *ListNode
