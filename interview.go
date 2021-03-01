@@ -274,6 +274,12 @@ func main() {
 	fmt.Println(fmt.Sprintf("newstr=%s",newstr))
 	recursion_dynamic.GetNumberofLIS([]int{1,3,5,4,7,6})
 	recursion_dynamic.GetLongetLIS([]int{1,3,5,4,7,6})
+	rowIndex,colIndex := binary_search.FindInTwoDimensionStrictSorted([][]int{
+		[]int{1,2,3},
+		[]int{4,5,6},
+		[]int{7,8,9},
+	},5)
+	fmt.Println(fmt.Sprintf("rowIndex=%d,colIndex=%d",rowIndex,colIndex))
 }
 
 

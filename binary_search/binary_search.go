@@ -7,6 +7,23 @@ import (
 //二维排序数组查找1 下一行第一个元素大于上一行最后一个元素
 //将二维数组看成一维排序数组，line =index/3 col index%3-1
 func FindInTwoDimensionStrictSorted(arr[][]int, target int) (int,int) {
+	rows := len(arr)
+	col := len(arr[0])
+	low := 0
+	high := rows*col -1
+	for low <= high {
+		mid := (low + high)/2
+		midRow := mid/col
+		midCol := mid%col
+
+		if arr[midRow][midCol] > target {
+			high = mid-1
+		} else if arr[midRow][midCol] == target {
+			return midRow,midCol
+		} else {
+			low = mid+1
+		}
+	}
 	return -1,-1
 }
 //二维排序数组查找2
