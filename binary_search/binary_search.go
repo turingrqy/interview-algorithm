@@ -118,27 +118,19 @@ func BinarySearchRotate (arr []int64, lookFor int64) int {
 func BinarySearchMinInRotate (arr []int64) int {
 	low := 0
 	high := len(arr)-1
-	midIndex := low
-	for arr[low] >= arr[high] {
-		if high-low == 1 {
-			midIndex = high
-			break
+	ans := int(0)
+	for low <= high {
+		mid := (low + high)/2
+		if arr[mid] > arr[high] {
+			ans = mid + 1
+			low = mid + 1
+		}else if arr[mid] < arr[high] {
+			high = mid
+		} else {
+			high --
 		}
-
-		midIndex = (low+high)/2
-		if arr[midIndex] == arr[low] && arr[midIndex] == arr[high] {
-			//顺序查找
-			GetMinInRatateOrder(arr, low, high)
-		}
-
-		if arr[midIndex] >= arr[low] {
-			low = midIndex
-		} else if arr[midIndex] <= arr[high] {
-			high = midIndex
-		}
-
 	}
-	return midIndex
+	return ans
 }
 
 func GetMinInRatateOrder (arr []int64, low, high int) int {
@@ -210,6 +202,9 @@ func GetMidIntwosortedArr(arr1 []int64, arr2 []int64) float64 {
 }
 
 func GetKthNumInTwoArr(arr1 []int64, arr2 []int64, k int) float64 {
+	if k> len(arr1) + len(arr2)  {
+		return 0
+	}
 	index1, index2 := 0, 0
 	for {
 		if index1 == len(arr1) {
@@ -249,7 +244,7 @@ func GetKthNumInTwoArr(arr1 []int64, arr2 []int64, k int) float64 {
 
 	return 0
 }
-//寻找峰值
+//寻找峰值 相邻元素不相等
 func FindPeek(arr []int) int {
 	left, right := 0, len(arr)-1
 
@@ -320,6 +315,7 @@ func GetClosestThreeNumSum(arr []int64, target int64) (a,b,c,sum int64) {
 	heap_sort.HeapSort(arr)
 	var aBest,bBest,cBest,sumBest int64
 	sumBest = math.MinInt64
+	//ans := int(0)
 	for i:= 0; i< len(arr)-2;i++ {
 		k := i+1
 		j := len(arr)-1
@@ -329,9 +325,11 @@ func GetClosestThreeNumSum(arr []int64, target int64) (a,b,c,sum int64) {
 		for k<j {
 			sum = arr[i] + arr[k] + arr[j]
 			if  sum < target {
+				//ans = k
 				k++
 				needReduce = true
 			} else if sum > target {
+				//ans = j
 				j--
 				needPlus = true
 			} else {

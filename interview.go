@@ -216,8 +216,8 @@ func main() {
 	//fmt.Println(fmt.Sprintf("list sum=%d",sum))
 	list.PrintList(sum)
 
-	res := binary_search.GetMidIntwosortedArr([]int64{1,3,5,7,9},[]int64{2,4,6,8,10})
-	fmt.Println(res)
+	res := binary_search.GetMidIntwosortedArr([]int64{1,3,5,7,9},[]int64{2,4,6,8,10,11})
+	fmt.Println("GetMidIntwosortedArr=",res)
 
 	str := other.DecodeStr("a2[a2[ab]d]c")
 	fmt.Println(str)
@@ -280,6 +280,8 @@ func main() {
 		[]int{7,8,9},
 	},5)
 	fmt.Println(fmt.Sprintf("rowIndex=%d,colIndex=%d",rowIndex,colIndex))
+	index1 := binary_search.BinarySearchMinInRotate([]int64{5,5,7,8,1,2,5,5})
+	fmt.Println(fmt.Sprintf("BinarySearchMinInRotate index=%d",index1))
 }
 
 
