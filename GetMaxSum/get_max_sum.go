@@ -1,5 +1,5 @@
 package GetMaxSum
-
+// 连续子数组最大和
 func GetMaxSum (arr []int64) int64 {
 
 	if len(arr) == 1 {

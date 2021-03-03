@@ -42,7 +42,7 @@ func GetLongestPalindrome (s string) {
 				res[i][j]= true
 			} else {
 				if s[i] == s[j] {
-					res[i][j] = res[i-1][j-1]
+					res[i][j] = res[i+1][j-1]
 				}
 			}
 
@@ -59,28 +59,27 @@ func GetLongestPalindrome (s string) {
 //最长非重复子串的长度
 //滑动窗口
 
-func GetNodupSubStrLen(s string) int {
-	dupMap := make(map[byte]bool)
-	maxLen := 0
+func GetMaxLenOfNoDupStr (s string) int {
+	max := 0
+	indexMap := make(map[byte]int)
+	left := 0
 	right :=0
-	for left:=0; left< len(s);left++ {
-		for ;right < len(s);right++ {
-			if _,ok:=dupMap[s[right]];ok {
-				break
-			} else {
-				dupMap[s[right]] = true
+	for ;right < len(s);right++ {
+		if index,ok := indexMap[s[right]];!ok {
+			indexMap[s[right]] = right
+		} else {
+			for i:= left;i<=index;i++ {
+				delete(indexMap,s[i])
 			}
-
+			left = index+1
+			indexMap[s[right]] = right
 		}
-		if right-left > maxLen {
-			maxLen = right-left
+		len := right-left+1
+		if len > max {
+			max = len
 		}
-		if right >= len(s) {
-			break
-		}
-		delete(dupMap,s[left])
 	}
-	return maxLen
+	return max
 }
 
 //哪个容器的水最多,和最长非重复子串类似使用双指针法
@@ -222,22 +221,16 @@ func getSubStr (str string, i int) (string,int) {
 	return numStr,i
 }
 //是否是回文数
-func IsPalindromeNum (num int64) bool  {
-	suffixNum := int64(0)
-	prefixNum := num
+func IsPalindromeNum (num int) bool  {
+	prefix := num
+	suffix := 0
 
-	round := 0
-
-	for ;prefixNum > suffixNum;round++ {
-		prefixNum /=10
-		suffixNum +=(prefixNum%10) * int64(math.Pow10(round))
+	for ;suffix< prefix; {
+		suffix = suffix * 10 +prefix%10
+		prefix /=10
 	}
 
-	if prefixNum == suffixNum {
-		return true
-	}
-
-	if suffixNum/10 == prefixNum {
+	if prefix == suffix || suffix/10==prefix {
 		return true
 	}
 	return false
@@ -402,6 +395,26 @@ func FindCombineSumEqTargetDFS (arr[]int, target int ,tmpArr []int, idx int, res
 		FindCombineSumEqTargetDFS (arr, target-arr[idx], tmpArr, idx, res)
 		tmpArr = tmpArr[:len(tmpArr)-1]
 	}
+}
+
+func Subsets(nums []int) [][]int {
+	cur := []int{}
+	res := [][]int{}
+	SubSetsDFS(nums, 0,cur, &res)
+	return res
+}
+
+func SubSetsDFS (nums []int, depth int, cur []int, res*[][]int) {
+	if depth == len(nums) {
+		tmpArr := []int{}
+		tmpArr = append(tmpArr, cur...)
+		*res = append(*res, tmpArr)
+		return
+	}
+
+	SubSetsDFS(nums, depth+1, cur, res)
+	cur = append(cur, nums[depth])
+	SubSetsDFS(nums, depth+1, cur, res)
 }
 
 
@@ -633,7 +646,8 @@ func MultiExceptself (arr[]int) []int {
 	return res
 }
 
-//买股票
+//买股票1 只能买一次
+
 func buyStokToMax(arr []int) int {
 	minPrice := 0
 	maxProfit := 0
@@ -689,7 +703,7 @@ func GetLongestUpInMemo(arr []int, i int, dp *[]int) int {
 }*/
 
 
-//数组的所有子集
+//数组的所有子集 字符串的所有子串？ 这个得看个常规方法
 func GetAllSubset (nums []int64) [][]int64 {
 	res := [][]int64{}
 	standardNum := (1 << len(nums))-1
@@ -770,8 +784,7 @@ func GenerateParenthesisDfs (n, target int,v byte, tmpByte []byte, res *[]string
 		return
 	}
 	GenerateParenthesisDfs (n+1, target,'(', tmpByte,res)
-	len:=len(tmpByte)
-	tmpByte = tmpByte[:len]
+
 	GenerateParenthesisDfs (n+1, target,')', tmpByte,res)
 }
 
@@ -913,6 +926,8 @@ func GetNextSeq (arr []int) {
 	var high = len(arr)-1
 	for low < high {
 		arr[low],arr[high] = arr[high],arr[low]
+		low ++
+		high --
 	}
 }
 

@@ -282,6 +282,7 @@ func main() {
 	fmt.Println(fmt.Sprintf("rowIndex=%d,colIndex=%d",rowIndex,colIndex))
 	index1 := binary_search.BinarySearchMinInRotate([]int64{5,5,7,8,1,2,5,5})
 	fmt.Println(fmt.Sprintf("BinarySearchMinInRotate index=%d",index1))
+	recursion_dynamic.MultiByStokMaxProfit([]int{7,1,5,3,6,4})
 }
 
 

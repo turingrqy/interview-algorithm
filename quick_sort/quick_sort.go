@@ -1,7 +1,7 @@
 package quick_sort
 
 //无序数组中的topk
-
+//数组中取中位数 数组中大多数元素
 func GetTopkbyPartition(arr []int64, k int) int {
 	if k > len(arr) {
 		return -1

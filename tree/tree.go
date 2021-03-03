@@ -368,6 +368,7 @@ func IsSearchTreeMidOrderStack (root *TreeNode) bool {
 	}
 	return true
 }
+
 func FindTreeMidOrderNextNode (node *TreeNode) *TreeNode {
 	if node == nil {
 		return nil
@@ -557,7 +558,7 @@ func IsChildTree (root1 *TreeNode, root2 *TreeNode) bool {
 		return true
 	}
 
-	return isMatch(root1.Left,root2) || isMatch(root1.Right,root2)
+	return IsChildTree(root1.Left,root2) || IsChildTree(root1.Right,root2)
 }
 
 func isMatch (root1 *TreeNode, root2 *TreeNode) bool {
@@ -873,7 +874,7 @@ func HasPathSumDFS (root *TreeNode, targetSum int, sum int) bool {
 	}
 	hasLeft := HasPathSumDFS(root.Left, targetSum, sum)
 	hasRight := HasPathSumDFS(root.Right, targetSum, sum)
-	sum -= int(root.Value)
+	//sum -= int(root.Value)
 	return hasLeft||hasRight
 }
 

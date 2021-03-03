@@ -5,6 +5,7 @@ package heap_sort
 大根堆定义
 */
 //n*logn
+//数组中取中位数 数组中大多数元素
 func HeapSort(arr []int64) {
 	buildHeap(arr)
 	length := len(arr)

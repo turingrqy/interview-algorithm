@@ -1,5 +1,9 @@
 package recursion_dynamic
 
+import (
+	"math"
+)
+
 //打家劫舍
 /*
 你是一个专业的小偷，计划偷窃沿街的房屋。每间房内都藏有一定的现金，影响你偷窃的唯一制约因素就是相邻的房屋装有相互连通的防盗系统，如果两间相邻的房屋在同一晚上被小偷闯入，系统会自动报警。
@@ -184,3 +188,44 @@ func GetLongetLIS (nums []int) [][]int {
 	}
 	return res
 }
+
+// 买股票最佳时机1 只能买一次
+func StokmaxProfit(arr[] int) {
+	maxProfit := 0
+	minPrice := math.MaxInt32
+	for i:=0;i<len(arr);i++ {
+		if arr[i] < minPrice {
+			minPrice = arr[i]
+		}
+		profit := arr[i]-minPrice
+		if profit > maxProfit {
+			maxProfit = profit
+		}
+	}
+}
+// 买股票最佳时机2 能买多次但买之前手里的股票必须卖出 二维数组dp[i][j] i 第i天 j 0，1 是否持有股票 值为收益
+func MultiByStokMaxProfit(arr[] int) int {
+	dp := make([][]int, len(arr))
+	for i:=0;i<len(dp);i++ {
+		dp[i] = make([]int,2)
+	}
+
+	dp[0][0] = 0
+	dp[0][1] = -arr[0]
+
+	for i:= 1;i<len(arr);i++ {
+		//没有持有股票 要不是前一天就没持有，要么昨天今天卖掉
+		dp[i][0] = max(dp[i-1][0],dp[i-1][1]+arr[i])
+		//没有持有股票 要不是前一天就持有，要么是昨天没有今天刚买
+		dp[i][1] = max(dp[i-1][1],dp[i-1][0]-arr[i])
+	}
+	return dp[len(arr)-1][0]
+}
+
+func max(a,b int) int {
+	if a > b {
+		return a
+	}
+	return b
+}
+
