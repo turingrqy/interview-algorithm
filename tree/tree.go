@@ -798,67 +798,33 @@ func abs (a int) int {
 
 //任意路径最大和不单单是从root 出发的链路
 //这种类型其实都是高度的变种后续遍历返回左右子树的最优解
-func GetMaxSumInTree (root *TreeNode) int64 {
-	if root == nil {
-		return 0
-	}
-
+func MaxGainIntree (root *TreeNode) int64 {
 	maxSum := int64(0)
-	NodeMaxGain(root, &maxSum)
+	MaxGainInTreeDFS(root, &maxSum)
 	return maxSum
 }
 
-func NodeMaxGain(root *TreeNode, maxSum *int64) int64 {
+//树中的最大和 任意路径
+func MaxGainInTreeDFS (root *TreeNode, MaxSum *int64) int64 {
 	if root == nil {
 		return 0
 	}
-	maxGainLeft := NodeMaxGain(root.Left, maxSum)
-	if maxGainLeft < 0 {
-		maxGainLeft = 0
+	leftMaxSum := MaxGainInTreeDFS(root.Left, MaxSum)
+	if leftMaxSum < 0 {
+		leftMaxSum = 0
 	}
-	maxGainRight := NodeMaxGain(root.Left, maxSum)
-	if maxGainRight < 0 {
-		maxGainRight = 0
-	}
-	newSum := maxGainLeft + maxGainRight + root.Value
-	if newSum > *maxSum {
-		*maxSum = newSum
+	rightMaxSum := MaxGainInTreeDFS(root.Right, MaxSum)
+	if rightMaxSum < 0 {
+		rightMaxSum = 0
 	}
 
-
-	return root.Value + int64(Max(int(maxGainLeft), int(maxGainRight)))
+	singleMax := int64(Max(int(rightMaxSum),int(leftMaxSum)))+root.Value
+	curMaxSum := rightMaxSum + leftMaxSum + root.Value
+	if curMaxSum > *MaxSum {
+		*MaxSum = curMaxSum
+	}
+	return singleMax
 }
-
-//从root触发的最大和路径
-func GetMaxSumFromRoot (root *TreeNode) int64 {
-	if root == nil {
-		return 0
-	}
-
-	maxSum := int64(0)
-	NodeMaxGainFromRoot(root, &maxSum)
-	return maxSum
-}
-//最大路径和不只是
-func NodeMaxGainFromRoot (root *TreeNode, maxSum *int64) int64 {
-	if root == nil {
-		return 0
-	}
-	maxGainLeft := NodeMaxGainFromRoot(root.Left, maxSum)
-	if maxGainLeft < 0 {
-		maxGainLeft = 0
-	}
-	maxGainRight := NodeMaxGainFromRoot(root.Right, maxSum)
-	if maxGainRight < 0 {
-		maxGainRight = 0
-	}
-	newSum := int64(Max(int(maxGainLeft), int(maxGainRight))) + root.Value
-	if newSum > *maxSum {
-		*maxSum = newSum
-	}
-	return newSum
-}
-
 //二叉树是否存在一个路径和==target的路径s
 func HasPathSum(root *TreeNode, targetSum int) bool {
 	return HasPathSumDFS(root,targetSum,0)

@@ -1,11 +1,13 @@
 package other
 
 import (
+	"context"
 	"fmt"
 	"math"
 	"renqiyang/interview/tree"
 	"strconv"
 )
+
 
 //两数相加之和
 func GetSumIndex (arr []int, target int)  {
@@ -13,7 +15,7 @@ func GetSumIndex (arr []int, target int)  {
 	for k,v :=range arr {
 		indexMap[v] = k
 	}
-
+	context.WithCancel(context.Background())
 	for k,v :=range arr {
 		coTarget := target-v
 		if i1,ok := indexMap[coTarget];ok {
