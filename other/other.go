@@ -6,6 +6,8 @@ import (
 	"math"
 	"renqiyang/interview/tree"
 	"strconv"
+	"sync"
+	"time"
 )
 
 
@@ -70,16 +72,17 @@ func GetMaxLenOfNoDupStr (s string) int {
 		if index,ok := indexMap[s[right]];!ok {
 			indexMap[s[right]] = right
 		} else {
+			len := right-left+1
+			if len > max {
+				max = len
+			}
 			for i:= left;i<=index;i++ {
 				delete(indexMap,s[i])
 			}
 			left = index+1
 			indexMap[s[right]] = right
 		}
-		len := right-left+1
-		if len > max {
-			max = len
-		}
+
 	}
 	return max
 }
@@ -490,7 +493,7 @@ func CatchRainQ (arr[]int) int {
 	res := 0
 	maxLeft := []int{}
 	maxRight := make([]int,0,len(arr))
-	maxLeft[0] = 0
+	maxLeft[0] = arr[0]
 	maxRight[len(arr)-1] = 0
 	for i:=1;i<len(arr)-1;i++ {
 		if arr[i] > maxLeft[i-1] {
@@ -886,7 +889,7 @@ func RotateMatrix(matrix [][]int)  {
 		}
 	}
 	for i:=0;i<n;i++ {
-		for j:=i;j<n;j++ {
+		for j:=i;j<i;j++ {
 			matrix[i][j],matrix[j][i] = matrix[j][i],matrix[i][j]
 		}
 	}
@@ -1062,6 +1065,69 @@ func longestConsecutive(nums []int) int {
 	}
 	return max
 }
+//矩阵传染 target =2 start (i,j) source=3
+func SpreadGrid (arr[][] int, target int, source int, startI,startJ int ) {
+	dp := [][]int{}
+	startPoint := []int{startI,startJ}
+	dp = append(dp, startPoint)
+	for i:=0; i< len(dp);i++ {
+		if arr[dp[i][0]][dp[i][1]] == source {
+			arr[dp[i][0]][dp[i][1]] = target
+			if dp[i][1]-1 >= 0 {
+				startPoint = []int{dp[i][0], dp[i][1]-1}
+				dp = append(dp,startPoint)
+			}
+			if dp[i][1]+1 < len(arr[0]) {
+				startPoint = []int{dp[i][0], dp[i][1]+1}
+				dp = append(dp,startPoint)
+			}
+			if dp[i][0]-1 >= 0 {
+				startPoint = []int{dp[i][0]-1, dp[i][1]}
+				dp = append(dp,startPoint)
+			}
+			if dp[i][0]+1 < len(arr) {
+				startPoint = []int{dp[i][0]+1, dp[i][1]}
+				dp = append(dp,startPoint)
+			}
+		}
+	}
+}
+
+// 令牌桶算法
+type TicketBucket struct {
+	StartTime time.Time
+	Cap int64
+	Interval int64 //ns
+	QuotaNum int64
+	AvaliableNum int64
+	LastTick int64
+	Lock sync.Mutex
+}
+
+func (self *TicketBucket) Take (count int64) int64 {
+	self.Lock.Lock()
+	self.AdjustNow(time.Now())
+	if self.AvaliableNum < 0 {
+		return 0
+	}
+	if count > self.AvaliableNum {
+		self.AvaliableNum = 0
+		return self.AvaliableNum
+	}
+	self.AvaliableNum -= count
+	self.Lock.Unlock()
+	return count
+}
+
+func (self *TicketBucket) AdjustNow (now time.Time)  {
+	currentTick := int64(now.Sub(self.StartTime))/self.Interval
+	self.AvaliableNum += (currentTick-self.LastTick)*self.QuotaNum
+	if self.AvaliableNum > self.Cap {
+		self.AvaliableNum = self.Cap
+	}
+	self.LastTick = currentTick
+}
+
 
 
 

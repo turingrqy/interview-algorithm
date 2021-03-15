@@ -283,6 +283,16 @@ func main() {
 	index1 := binary_search.BinarySearchMinInRotate([]int64{5,5,7,8,1,2,5,5})
 	fmt.Println(fmt.Sprintf("BinarySearchMinInRotate index=%d",index1))
 	recursion_dynamic.MultiByStokMaxProfit([]int{7,1,5,3,6,4})
+	testGrid := [][]int{
+		[]int{3,2,3,4,5},
+		[]int{5,4,3,2,1},
+		[]int{1,2,3,3,3},
+		[]int{2,3,3,2,1},
+	}
+	other.SpreadGrid(testGrid, 2,3,2,2)
+	println(fmt.Sprintf("testGrid = %+v", testGrid))
+	resnew := binary_search.GetSingleNumInArr([]int{1,1,2,3,3,4,4,5,5})
+	fmt.Println("resnew=",resnew)
 }
 
 

@@ -305,6 +305,29 @@ func GetOnceDupNumInArr (arr []int ) int {
 	}
 	return ans
 }
+/*
+有序数组，有2N+1个数，其中N个数成对出现，仅1个数单独出现，找出那个单独出现的数.,时间复杂度
+
+1，1，2，2，3，4，4，5，5，6，6，7，7
+*/
+
+func GetSingleNumInArr (arr []int) int {
+	low := 0
+	high := len(arr)-1
+	for low <= high {
+		mid := (low + high)/2
+		if mid - 1 >= 0 && arr[mid] == arr[mid-1] {
+			high = mid
+		} else if mid + 1 < len(arr)-1 && arr[mid] == arr[mid+1] {
+			low = low
+		} else if mid - 1 >= 0 && arr[mid] != arr[mid-1] && mid + 1 < len(arr)-1 && arr[mid] != arr[mid+1] {
+			return arr[mid]
+		} else {
+			return arr[mid]
+		}
+	}
+	return -1
+}
 
 /*
 给定一个整数数组找到3个数的和最接近于target
@@ -319,19 +342,22 @@ func GetClosestThreeNumSum(arr []int64, target int64) (a,b,c,sum int64) {
 	for i:= 0; i< len(arr)-2;i++ {
 		k := i+1
 		j := len(arr)-1
-		needReduce := false
-		needPlus := false
+		var needReduce,needPlus bool
+
 		sum := int64(0)
 		for k<j {
+
 			sum = arr[i] + arr[k] + arr[j]
 			if  sum < target {
 				//ans = k
 				k++
 				needReduce = true
+				needPlus = false
 			} else if sum > target {
 				//ans = j
 				j--
 				needPlus = true
+				needReduce = false
 			} else {
 				return arr[i],arr[k],arr[j],target
 			}
@@ -374,6 +400,26 @@ func GetSqrt(x int) int {
 		}
 	}
 	return ans
+}
+
+/*找出数组中重复的数字。
+
+
+在一个长度为 n 的数组 nums 里的所有数字都在 0～n-1 的范围内。数组中某些数字是重复的，但不知道有几个数字重复了，也不知道每个数字重复了几次。请找出数组中任意一个重复的数字。
+
+来源：力扣（LeetCode）
+链接：https://leetcode-cn.com/problems/shu-zu-zhong-zhong-fu-de-shu-zi-lcof
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。*/
+
+func GetDupInArr(nums []int) int {
+	for i:=0;i<len(nums);i++ {
+		for nums[i] != i {
+			if nums[i] == nums[nums[i]] {
+				return nums[i]
+			}
+			nums[i],nums[nums[i]] = nums[nums[i]],nums[i]
+		}
+	}
 }
 
 
