@@ -420,6 +420,7 @@ func GetDupInArr(nums []int) int {
 			nums[i],nums[nums[i]] = nums[nums[i]],nums[i]
 		}
 	}
+	return -1
 }
 
 
