@@ -1,13 +1,10 @@
 package other
 
 import (
-	"context"
 	"fmt"
 	"math"
 	"renqiyang/interview/tree"
 	"strconv"
-	"sync"
-	"time"
 )
 
 
@@ -17,7 +14,6 @@ func GetSumIndex (arr []int, target int)  {
 	for k,v :=range arr {
 		indexMap[v] = k
 	}
-	context.WithCancel(context.Background())
 	for k,v :=range arr {
 		coTarget := target-v
 		if i1,ok := indexMap[coTarget];ok {
@@ -68,13 +64,18 @@ func GetMaxLenOfNoDupStr (s string) int {
 	indexMap := make(map[byte]int)
 	left := 0
 	right :=0
+	var sublen int
 	for ;right < len(s);right++ {
 		if index,ok := indexMap[s[right]];!ok {
 			indexMap[s[right]] = right
+			sublen = right-left+1
+			if sublen > max {
+				max = sublen
+			}
 		} else {
-			len := right-left+1
-			if len > max {
-				max = len
+			sublen = right-left+1
+			if sublen > max {
+				max = sublen
 			}
 			for i:= left;i<=index;i++ {
 				delete(indexMap,s[i])
@@ -271,6 +272,10 @@ func DeleteDupInArr (arr []int) {
 // a^b^a = b^(a^a)=b^0=b
 //数组中只出现一次的数字
 //相同取0，相异取1。（二进制）
+/*不重复的数字有两个，剑指offer上面也有“找出数组中只出现了一次的两个数”，解决办法是先遍历一遍数组，异或得到一个数N，这个数就是只出现一次的那两个数异或的结果，然后找到N最低为1的位（假设是m位），再次遍历数组，按m位为1和为0将数组分为两个数组，此时只出现一次的两个数就被分到了不同的组，然后对每个组按照（1）的方法找出来就可以了，代码如下：
+————————————————
+版权声明：本文为CSDN博主「ddxu」的原创文章，遵循CC 4.0 BY-SA版权协议，转载请附上原文出处链接及本声明。
+原文链接：https://blog.csdn.net/d12345678a/article/details/54233795*/
 func SingleNumInArr (arr []int) int {
 	res := 0
 	for i:=0; i< len(arr);i++ {
@@ -558,6 +563,8 @@ func largestRectangleArea(heights []int) int {
 	return maxArea
 }
 //单调栈解法
+//有一群牛站成一排，每头牛都是面朝右的，每头牛可以看到他右边身高比他小的牛。给出每头牛的身高，要求每头牛能看到的牛的总数。
+//给出一个序列，求出一个子序列，使得这个序列中的最小值乘以这个序列的和的值最大
 type boarderItem struct {
 	Height int
 	index int
@@ -623,6 +630,36 @@ func largestRectangleAreaWithStack(heights []int) int {
 	}
 	return  maxArea
 }
+//无序数组输出每个元素右边第一个比他大的元素
+func GetFirstMaxFromRight (arr []int) []int {
+	stack := []boarderItem{}
+	res := make([]int, len(arr))
+	for i:= 0; i< len(arr);i++ {
+		tmp := boarderItem{
+			arr[i],
+			i,
+		}
+		if len(stack) == 0 {
+
+			stack = append(stack, tmp)
+		} else {
+			for len(stack) >0 {
+				if arr[i] > stack[len(stack)-1].Height {
+					res[stack[len(stack)-1].index] = arr[i]
+					stack = stack[:len(stack)-1]
+				}else {
+					break
+				}
+			}
+			stack = append(stack,tmp)
+		}
+	}
+	for len(stack) > 0 {
+		res[stack[len(stack)-1].index] = -1
+		stack = stack[0:len(stack)-1]
+	}
+	return res
+}
 
 
 /*
@@ -637,11 +674,11 @@ func MultiExceptself (arr[]int) []int {
 	multiLeft[0] = 1
 	multiRight[len(arr)-1] = 1
 	for i:=1; i< len(arr);i++ {
-		multiLeft[i] =  multiLeft[i-1] * arr[i]
+		multiLeft[i] =  multiLeft[i-1] * arr[i-1]
 	}
 
-	for j:= len(arr)-2;j>0;j-- {
-		multiRight[j] = multiRight[j+1] * arr[j]
+	for j:= len(arr)-2;j>=0;j-- {
+		multiRight[j] = multiRight[j+1] * arr[j+1]
 	}
 
 	res := make([]int, len(arr),len(arr))
@@ -889,7 +926,7 @@ func RotateMatrix(matrix [][]int)  {
 		}
 	}
 	for i:=0;i<n;i++ {
-		for j:=i;j<i;j++ {
+		for j:=0;j<i;j++ {
 			matrix[i][j],matrix[j][i] = matrix[j][i],matrix[i][j]
 		}
 	}
@@ -1092,41 +1129,176 @@ func SpreadGrid (arr[][] int, target int, source int, startI,startJ int ) {
 		}
 	}
 }
-
-// 令牌桶算法
-type TicketBucket struct {
-	StartTime time.Time
-	Cap int64
-	Interval int64 //ns
-	QuotaNum int64
-	AvaliableNum int64
-	LastTick int64
-	Lock sync.Mutex
+//贪心算法
+type peopleProfit  struct {
+	Profit int
+	Num int
+}
+func GetMaxProfit (peopleProfits []peopleProfit, cap[] int) int {
+	QuickSort(peopleProfits, 0, len(peopleProfits)-1)
+	memMap := make(map[int]bool)
+	maxProfit := 0
+	for i := 0; i< len(cap);i++ {
+		for j := 0; j< len(peopleProfits);j++ {
+			if _,ok := memMap[j];!ok {
+				if peopleProfits[j].Num <= cap[i] {
+					maxProfit += peopleProfits[j].Profit
+					memMap[j] = true
+				}
+			}
+		}
+	}
+	return maxProfit
 }
 
-func (self *TicketBucket) Take (count int64) int64 {
-	self.Lock.Lock()
-	self.AdjustNow(time.Now())
-	if self.AvaliableNum < 0 {
-		return 0
-	}
-	if count > self.AvaliableNum {
-		self.AvaliableNum = 0
-		return self.AvaliableNum
-	}
-	self.AvaliableNum -= count
-	self.Lock.Unlock()
-	return count
+func QuickSort (profit []peopleProfit, low, high int) {
+	index := partition(profit, low, high)
+	QuickSort(profit, index+1, high)
+	QuickSort(profit, low, index-1)
 }
 
-func (self *TicketBucket) AdjustNow (now time.Time)  {
-	currentTick := int64(now.Sub(self.StartTime))/self.Interval
-	self.AvaliableNum += (currentTick-self.LastTick)*self.QuotaNum
-	if self.AvaliableNum > self.Cap {
-		self.AvaliableNum = self.Cap
+func partition(profit []peopleProfit, low, high int) int {
+	i:= low
+	j := high
+
+	for i<j {
+		for ;j>i;j-- {
+			if profit[j].Profit > profit[low].Profit {
+				break
+			}
+		}
+		for ;i<j;i++ {
+			if profit[i].Profit < profit[low].Profit {
+				break
+			}
+		}
+		if i<j {
+			profit[j], profit[i] = profit[i],profit[j]
+		}
 	}
-	self.LastTick = currentTick
+
+	profit[i],profit[low] = profit[low], profit[i]
+	return i
 }
+
+//棋盘覆盖问题
+func CoverGrid (size int, bc,br int) {
+	Grid := make ([][]int, size)
+	for i:= 0; i< size;i++ {
+		Grid[i] = make([]int, size)
+	}
+
+	CoverGridPartition(Grid, 0,0,bc,br,size,0)
+	for i:= 0; i< size;i++ {
+		println(fmt.Sprintf("res=%+v", Grid[i]))
+	}
+}
+
+func CoverGridPartition (Grid [][]int,sc, sr, bc, br,size,num int) {
+	if size == 1 {
+		return
+	}
+	newSize := size/2
+	num++
+
+	if bc < sc + newSize && br < sr + newSize {
+		//block 点在当前的分区内
+		CoverGridPartition(Grid, sc, sr, bc, br, newSize, num)
+	} else {
+		Grid[sr + newSize-1][sc + newSize-1] = num
+		CoverGridPartition(Grid, sc, sr, sc + newSize-1, sr + newSize-1, newSize, num)
+	}
+
+	if bc >= sc + newSize && br < sr + newSize {
+		CoverGridPartition(Grid, sc + newSize, sr, bc, br, newSize, num)
+	} else {
+		//左下角覆盖
+		Grid[sr + newSize-1][sc + newSize] = num
+		CoverGridPartition(Grid, sc + newSize, sr, sc + newSize, sr + newSize-1, newSize, num)
+	}
+
+	if br >= sr + newSize && bc < sc + newSize {
+		CoverGridPartition(Grid, sc, sr + newSize, bc, br, newSize, num)
+	} else {
+		//右上角覆盖
+		Grid[sr + newSize][sc + newSize-1] = num
+		CoverGridPartition(Grid, sc, sr + newSize, sc + newSize-1, sr + newSize, newSize, num)
+	}
+
+	if br >=sr + newSize && bc >= sc +newSize {
+		CoverGridPartition(Grid, sc + newSize, sr + newSize, bc, br, newSize, num)
+	} else {
+		Grid[sr + newSize][sc +newSize] = num
+		CoverGridPartition(Grid, sc + newSize, sr + newSize, sc +newSize, sr + newSize, newSize, num)
+	}
+}
+// 调整文本左右对齐
+func JustifyWord (words []string, cap int)  {
+	start := 0
+	end := 0
+	//curStringArr := []string{}
+	curLen := 0
+	curWordLen := 0
+	curWordNum := 0
+	for ;end < len(words); {
+
+		if curLen == 0 {
+			if len(words[end]) > cap {
+				return
+			}
+			//curStringArr = append(curStringArr, words[end])
+			curLen += len(words[end])
+			curWordLen += len(words[end])
+			curWordNum++
+			end ++
+			continue
+		}
+		if len(words[end]) + 1 + curLen <= cap {
+			curLen += len(words[end]) + 1
+			curWordLen += len(words[end])
+			curWordNum++
+			end ++
+		} else {
+			//放不下了
+			//计算 需要多少空格填充
+			fillBlankNum := cap-curWordLen
+			divide := fillBlankNum/(curWordNum-1)
+			divideleft := fillBlankNum%(curWordNum-1)
+			curString := ""
+			for i:= start;i<end;i++ {
+				curString += words[i]
+				if i != end-1 {
+					for i:=0;i<divide;i++ {
+						curString += " "
+					}
+					if divideleft > 0 {
+						curString += " "
+						divideleft --
+					}
+				}
+			}
+			println(curString)
+			curLen = 0
+			curWordLen = 0
+			curWordNum = 0
+			start = end
+		}
+	}
+	if start < len(words) {
+		str := ""
+		for i:=start;i<len(words);i++ {
+			if str == "" {
+				str += words[i]
+			} else {
+				str += " "
+				str +=  words[i]
+			}
+		}
+		println(str)
+	}
+}
+
+
 
 
 

@@ -291,8 +291,49 @@ func main() {
 	}
 	other.SpreadGrid(testGrid, 2,3,2,2)
 	println(fmt.Sprintf("testGrid = %+v", testGrid))
-	resnew := binary_search.GetSingleNumInArr([]int{1,1,2,3,3,4,4,5,5})
-	fmt.Println("resnew=",resnew)
+
+
+	resMaxArr := other.GetFirstMaxFromRight([]int{1,5,3,6,4,8,9,10})
+	fmt.Println(resMaxArr)
+	other.CoverGrid(4, 0,1)
+	other.JustifyWord([]string{"This", "is", "an", "example", "of", "text", "justification."},16)
+	resMulti := other.MultiExceptself([]int{1,2,3,4,5})
+	fmt.Println(resMulti)
+	testGrid1 :=[][]int{
+		[]int{3,2,3,4},
+		[]int{5,4,3,2},
+		[]int{1,2,3,3},
+		[]int{2,3,3,2},
+	}
+	other.RotateMatrix(testGrid1)
+	fmt.Println(fmt.Sprintf("testGrid1=%+v", testGrid1))
+	tmp1 := &list.ListNode {
+		3,
+		nil,
+	}
+	tmp2 := &list.ListNode{
+		2,
+		nil,
+	}
+	tmp3 := &list.ListNode {
+		5,
+		nil,
+	}
+	tmp4 := &list.ListNode {
+		1,
+		nil,
+	}
+	tmp1.Next = tmp2
+	tmp2.Next = tmp3
+	tmp3.Next = tmp4
+	newhead := list.SortList(tmp1)
+	printTmp := newhead
+	for printTmp != nil {
+		fmt.Println(printTmp.Value)
+		printTmp = printTmp.Next
+	}
+	resNew := binary_search.GetNoDupNumInSortedDoubleArr([]int{1,2,2,3,3,4,4,5,5,6,6,7,7,8,8})
+	fmt.Println("resNew = ", resNew)
 }
 
 

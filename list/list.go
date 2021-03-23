@@ -181,38 +181,26 @@ func GetEnterNodeInRing (head *ListNode) *ListNode {
 	return nil
 }
 
-func SortList (head *ListNode) *ListNode {
-
-	if head == nil {
-		return nil
-	}
-
-	midNode,midNext := GetMidNodeInList(head)
-	midNode.Next = nil
-	leftList := SortList(head)
-	rightList := SortList(midNext)
-
-	return merge(leftList, rightList)
-}
-
 func GetMidNodeInList(head *ListNode) (*ListNode,*ListNode) {
 	if head == nil {
 		return nil, nil
 	}
 
-	if head.Next == nil {
-		return head,nil
-	}
+
 
 	first := head
 	second := head
+	var prev *ListNode
 
 	for second != nil && second.Next != nil {
+		prev = first
 		first = first.Next
 		second = second.Next.Next
 	}
-
-	return first, first.Next
+	if prev != nil {
+		prev.Next = nil
+	}
+	return prev, first
 }
 
 func merge (head1 *ListNode, head2 *ListNode) *ListNode {
@@ -413,8 +401,8 @@ func mergeTwoSortedList(head1 *ListNode, head2 *ListNode) *ListNode {
 
 	var newHead *ListNode
 	var tail *ListNode
-	var p1 *ListNode
-	var p2 *ListNode
+	var p1 *ListNode = head1
+	var p2 *ListNode = head2
 	if head1.Value < head2.Value {
 		newHead = head1
 		tail = newHead
@@ -450,5 +438,44 @@ func mergeTwoSortedList(head1 *ListNode, head2 *ListNode) *ListNode {
 }
 
 
-//旋转链表
+func SortList(head *ListNode) *ListNode {
+	left, right := curList(head)
+	// 单个的链表不再切割 否则会一直切下去
+	if left != nil && left.Next != nil{
+		left = SortList(left)
+	}
 
+	if right != nil && right.Next != nil{
+		right = SortList(right)
+	}
+	return mergeTwoSortedList(left, right)
+}
+
+// 利用快慢指针 找到链表中点
+func curList(head *ListNode)(*ListNode, *ListNode){
+	if head == nil{
+		return nil, nil
+	}
+	if head.Next == nil {
+		return head, nil
+	}
+	if head.Next != nil && head.Next.Next == nil {
+		headNext := head.Next
+		head.Next = nil
+		return head, headNext
+	}
+	fast := head
+	slow := head
+	var prev * ListNode
+	for fast != nil && fast.Next != nil{
+		fast = fast.Next.Next
+		prev = slow
+		slow = slow.Next
+
+	}
+	if prev != nil {
+		prev.Next = nil
+	}
+
+	return head, slow
+}

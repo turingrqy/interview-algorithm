@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 )
-//交替打印
+//交替打印 活用chan 阻塞非阻塞 有没有buffer
 func main () {
 	num := 0
 	chan1 := make(chan int)

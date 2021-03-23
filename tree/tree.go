@@ -368,7 +368,7 @@ func IsSearchTreeMidOrderStack (root *TreeNode) bool {
 	}
 	return true
 }
-
+// 没有的话中序遍历
 func FindTreeMidOrderNextNode (node *TreeNode) *TreeNode {
 	if node == nil {
 		return nil

@@ -310,19 +310,44 @@ func GetOnceDupNumInArr (arr []int ) int {
 
 1，1，2，2，3，4，4，5，5，6，6，7，7
 */
+// 也是二分只不过要计算下先检查 是不是和两边的数相同
 
-func GetSingleNumInArr (arr []int) int {
+func GetNoDupNumInSortedDoubleArr (arr []int) int {
 	low := 0
 	high := len(arr)-1
+
+	if len(arr) == 1 {
+		return arr[0]
+	}
 	for low <= high {
 		mid := (low + high)/2
-		if mid - 1 >= 0 && arr[mid] == arr[mid-1] {
-			high = mid
-		} else if mid + 1 < len(arr)-1 && arr[mid] == arr[mid+1] {
-			low = low
-		} else if mid - 1 >= 0 && arr[mid] != arr[mid-1] && mid + 1 < len(arr)-1 && arr[mid] != arr[mid+1] {
+		if mid + 1 < len(arr) && arr[mid] == arr[mid+1] {
+			itemNum := high-mid+1
+			if itemNum % 2 == 0 {
+				high = mid -1
+			} else {
+				low = mid +2
+			}
+			continue
+		}
+		if mid -1 >= 0 && arr[mid-1] == arr[mid] {
+			itemNum := mid-low+1
+			if itemNum % 2 == 0 {
+				low = mid +1
+			} else {
+				high = mid-2
+			}
+			continue
+		}
+
+		if mid -1 < 0 && arr[mid] != arr[mid+1] {
 			return arr[mid]
-		} else {
+		}
+
+		if mid +1 > len(arr) && arr[mid] != arr[mid-1] {
+			return arr[mid]
+		}
+		if mid -1>=0 && mid + 1 < len(arr) && arr[mid] != arr[mid-1] && arr[mid] != arr[mid+1] {
 			return arr[mid]
 		}
 	}
@@ -409,7 +434,9 @@ func GetSqrt(x int) int {
 
 来源：力扣（LeetCode）
 链接：https://leetcode-cn.com/problems/shu-zu-zhong-zhong-fu-de-shu-zi-lcof
-著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。*/
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。
+置换
+*/
 
 func GetDupInArr(nums []int) int {
 	for i:=0;i<len(nums);i++ {
