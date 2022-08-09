@@ -1,6 +1,7 @@
 package binary_search
 
 import (
+	"fmt"
 	"math"
 	"renqiyang/interview/heap_sort"
 )
@@ -133,63 +134,7 @@ func BinarySearchMinInRotate (arr []int64) int {
 	return ans
 }
 
-func GetMinInRatateOrder (arr []int64, low, high int) int {
 
-	index := low
-	min := arr[low]
-	for i:=index +1; i<= high;i++ {
-		if min > arr[i] {
-			index = i
-			min = arr[i]
-		}
-	}
-
-	return index
-}
-
-/*func getDpBinarySearch(arr []int64, target int64) int {
-	low := 0;
-	high := len(arr)-1
-
-	for low <= high {
-		if target < arr[low] {
-			return low
-		}
-		if target > arr[high] {
-			return high +1
-		}
-
-		mid := (low+high)/2
-
-		if arr[mid] == target {
-			return -1
-		}
-		if arr[mid] > target {
-			high = mid -1
-		} else {
-			low = mid + 1
-		}
-	}
-	return -1
-}
-// 最长递增子序列顺序和位置要求和子数组相同 更好的解法在动态规划中
-func GetLongestUpSubArr (arr []int64) [][]int64 {
-	dp := make([][]int64,len(arr))
-	en := []int64{}
-
-	dp = append(dp, []int64{arr[0]})
-	en = append(en, arr[0])
-	for key, val := range arr {
-		p := getDpBinarySearch(en, val)
-		if p >= 0 {
-			en = append(en[0:p], val)
-			tmp := []int64{}
-			dp[key] = append(tmp, en...)
-		}
-	}
-
-	return dp
-}*/
 //两个递增数组找到两个数组中的中位数
 //log(m+n) log 一般都要想到二分查找
 func GetMidIntwosortedArr(arr1 []int64, arr2 []int64) float64 {
@@ -344,7 +289,7 @@ func GetNoDupNumInSortedDoubleArr (arr []int) int {
 			return arr[mid]
 		}
 
-		if mid +1 > len(arr) && arr[mid] != arr[mid-1] {
+		if mid +1 >= len(arr) && arr[mid] != arr[mid-1] {
 			return arr[mid]
 		}
 		if mid -1>=0 && mid + 1 < len(arr) && arr[mid] != arr[mid-1] && arr[mid] != arr[mid+1] {
@@ -355,7 +300,7 @@ func GetNoDupNumInSortedDoubleArr (arr []int) int {
 }
 
 /*
-给定一个整数数组找到3个数的和最接近于target
+给定一个配排序的先排序整数数组找到3个数的和最接近于target 3数之和 最接近
 */
 func GetClosestThreeNumSum(arr []int64, target int64) (a,b,c,sum int64) {
 	//1.先排序
@@ -407,6 +352,41 @@ func getDistance (a, target int64) int64 {
 	return d
 }
 
+//给你一个包含 n 个整数的数组 nums，判断 nums 中是否存在三个元素 a，b，c ，使得 a + b + c = 0 ？请你找出所有和为 0 且不重复的三元组。
+//
+//注意：答案中不可以包含重复的三元组。
+//
+//来源：力扣（LeetCode）
+//链接：https://leetcode.cn/problems/3sum
+//著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。
+func GetThreeNumSumEqTarget (arr []int64, target int64) {
+	heap_sort.HeapSort(arr)
+	for first := 0; first < len(arr)-2; first++ {
+		if first > 0 && arr[first] == arr[first-1] {
+			continue
+		}
+		coTarget := target - arr[first]
+		third := len(arr)-1
+		second := first+1
+		for  ;second < third; second++ {
+			if second > first + 1 && arr[second] == arr[second-1] {
+				continue
+			}
+
+			for second < third && arr[second] + arr[third] > coTarget {
+				third--
+			}
+
+			if second == third {
+				break
+			}
+			if arr[second] + arr[third] == coTarget {
+				println(fmt.Sprintf("first=%d, second=%d, third=%d", arr[first], arr[second], arr[third]))
+			}
+		}
+	}
+}
+
 // x的平方根 二分查找
 func GetSqrt(x int) int {
 	low := 1
@@ -450,6 +430,41 @@ func GetDupInArr(nums []int) int {
 	return -1
 }
 
+
+/*
+34. 在排序数组中查找元素的第一个和最后一个位置
+给定一个按照升序排列的整数数组 nums，和一个目标值 target。找出给定目标值在数组中的开始位置和结束位置。
+
+如果数组中不存在目标值 target，返回 [-1, -1]。
+右边界就是找第一个大于target的下标
+左边界是找第一个大于等于target的下标
+*/
+func BinarySearchRange (nums []int, target int, lower bool) int {
+	low := 0
+	high := len(nums)-1
+	ans := len(nums)
+	mid := (high+low)/2
+	for low <= high {
+		if nums[mid] > target || (lower && nums[mid] >= target) {
+			ans = mid
+			high = mid -1
+		} else {
+			low = mid+1
+		}
+	}
+	return ans
+}
+
+func GetEqualRangeInSortedArr (nums []int, target int) (int, int) {
+	leftIdx := BinarySearchRange (nums, target, true)
+	rightIdx := BinarySearchRange (nums, target, false)-1
+
+	if leftIdx <= rightIdx && rightIdx < len(nums) && nums[leftIdx] == target && nums[rightIdx] == target {
+		return leftIdx, rightIdx
+	} else {
+		return -1, -1
+	}
+}
 
 
 

@@ -22,7 +22,7 @@ func RobMax(arr []int) int {
 	} else {
 		dpArr[1] = dpArr[1]
 	}
-	for j:=2;j<len(arr)-1;j++ {
+	for j:=2;j<len(arr);j++ {
 		if arr[j] + dpArr[j-2] > dpArr[j-1] {
 			dpArr[j] = arr[j] + dpArr[j-2]
 		} else {
@@ -33,21 +33,6 @@ func RobMax(arr []int) int {
 	return dpArr[len(arr)-1]
 }
 
-//最大子数组和
-func GetMaxSumInArray(arr []int64) int64 {
-	maxSum :=arr[0]
-	sum := int64(0)
-	for i:=0;i< len(arr);i++ {
-		sum += arr[i]
-		if sum > maxSum {
-			maxSum = sum
-		}
-		if sum < 0 {
-			sum = 0
-		}
-	}
-	return maxSum
-}
 //乘积最大子数组 乘积
 func GetMaxMulti(arr []int) int {
 	max := arr[0]
@@ -77,114 +62,105 @@ func GetMaxMulti(arr []int) int {
 	return maxRes
 }
 
+//最长连递增子序列 看位置关系
 func GetMaxLengthOfLIS(nums []int) int {
 	dp := make([]int, len(nums))
 	dp[0] =1
-	for i:=1;i<len(nums);i++ {
-		max := 1
-		for j:= 0;j<i;j++ {
-			if nums[i]>nums[j] {
-				tmpMax := dp[j] + 1
-				if tmpMax > max {
-					max = tmpMax
+	res := 0
+	for i:=1; i<len(nums); i++ {
+		dp[i] = 1
+		for j := 0; j<i; j++ {
+			if nums[i] > nums[j] {
+				tmp := dp[j]+1
+				if tmp > dp[i] {
+					dp[i] = tmp
 				}
 			}
 		}
-		dp[i] = max
+		res = int(math.Max(float64(dp[i]), float64(res)))
 	}
-	max := 0
-	for i:=0;i<len(dp);i++ {
-		if dp[i] > max {
-			max = dp[i]
-		}
-	}
-	return max
+	return res
 }
 func GetNumberofLIS (nums []int) int {
 	dp := make([]int, len(nums))
 	dp[0] =1
 	counts := make([]int, len(nums))
 	counts[0]=1
-	for i:=1;i<len(nums);i++ {
-		max := 1
+	maxLen := 1
+	countRes := 1
+	for i:=0; i<len(nums);i++ {
+		dp[i] = 1
 		counts[i] = 1
-		for j:= 0;j<i;j++ {
-			if nums[i]>nums[j] {
-				tmpMax := dp[j] + 1
-				if tmpMax > max {
-					max = tmpMax
+		for j:=0; j<i; j++ {
+			if nums[i] > nums[j] {
+				tmp := dp[j] + 1
+				if tmp > dp[i] {
+					dp[i] = tmp
 					counts[i] = counts[j]
-				} else if tmpMax==max {
+				} else if tmp == dp[i] {
 					counts[i] += counts[j]
 				}
 			}
 		}
-		dp[i] = max
-	}
-	maxCount := 0
-	maxLen := 0
-	for i:=0;i<len(dp);i++ {
-		if dp[i] > maxLen {
+		if dp[i] == maxLen {
+			countRes += counts[i]
+		} else if dp[i] > maxLen {
 			maxLen = dp[i]
-			maxCount= counts[i]
-		} else if dp[i] == maxLen {
-			maxCount+= counts[i]
+			countRes = counts[i]
 		}
 	}
-	return maxCount
+	return countRes
 }
 
 func GetLongetLIS (nums []int) [][]int {
 	dp := make([]int,len(nums))
-	lisArr := make([][][]int, len(nums))
-	lisArr[0] = make([][]int, 1)
-	lisArr[0][0] = []int{nums[0]}
+	list := make([][][]int, 0, len(nums))
+	maxLen := 1
+	dp[0] = 1
+	list[0] = [][]int{}
+	list[0] = append(list[0], []int{nums[0]})
+	res := make([][]int, 0, 0)
 
-	for i:= 0; i< len(nums);i++ {
-		max := 1
-		var maxIndex []int
-		for j:= 0; j<i;j++ {
+	for i:=0; i<len(nums);i++ {
+		dp[i]=1
+		list[i] = [][]int{{nums[i]}}
+
+		for j:=0; j<i; j++ {
 			if nums[i] > nums[j] {
-				tmpMax := dp[j]+1
-				if tmpMax > max {
-					max = tmpMax
-					maxIndex = []int{}
-					maxIndex = append(maxIndex,j)
-				} else if tmpMax== max{
-					maxIndex = append(maxIndex,j)
+				tmp := dp[j]+1
+				if tmp > dp[i] {
+					dp[i] = tmp
+					list[i] = [][]int{}
+					for k := 0; k<len(list[j]); j++ {
+						var tmpArr []int
+						tmpArr = append(tmpArr, list[j][k]... )
+						tmpArr = append(tmpArr, nums[i])
+						list[i] = append(list[i], tmpArr)
+					}
+				} else if tmp > dp[i] {
+					for k := 0; k<len(list[j]); j++ {
+						var tmpArr []int
+						tmpArr = append(tmpArr, list[j][k]... )
+						tmpArr = append(tmpArr, nums[i])
+						list[i] = append(list[i], tmpArr)
+					}
 				}
 			}
 		}
-		dp[i] = max
-		if len(maxIndex) > 0 {
-			lisArr[i] = [][]int{}
-			for _,index := range maxIndex {
-				for _,arr := range lisArr[index] {
-					tmpArr := []int{}
-					tmpArr = append(tmpArr, arr...)
-					tmpArr = append(tmpArr, nums[i])
-					lisArr[i] = append(lisArr[i],tmpArr)
-				}
-			}
-		} else {
-			lisArr[i] = make([][]int, 1)
-			lisArr[i][0] = []int{nums[i]}
-		}
-	}
-	maxLen:=0
-	var maxIndex []int
-	for i:=0;i<len(lisArr);i++ {
 		if dp[i] > maxLen {
-			maxLen = dp[i]
-			maxIndex = []int{}
-			maxIndex = append(maxIndex, i)
-		} else {
-			maxIndex = append(maxIndex, i)
+			res = make([][]int, 0, 0)
+			for _, v :=  range list[i] {
+				var tmpArr []int
+				tmpArr = append(tmpArr, v...)
+				res = append(res, tmpArr)
+			}
+		} else if dp[i] == maxLen {
+			for _, v :=  range list[i] {
+				var tmpArr []int
+				tmpArr = append(tmpArr, v...)
+				res = append(res, tmpArr)
+			}
 		}
-	}
-	res := [][]int{}
-	for _,index :=range maxIndex {
-		res = append(res,lisArr[index]...)
 	}
 	return res
 }
@@ -228,4 +204,96 @@ func max(a,b int) int {
 	}
 	return b
 }
+
+
+/*最长公共子序列
+给定两个字符串 text1 和 text2，返回这两个字符串的最长 公共子序列 的长度。如果不存在 公共子序列 ，返回 0 。
+
+一个字符串的 子序列 是指这样一个新的字符串：它是由原字符串在不改变字符的相对顺序的情况下删除某些字符（也可以不删除任何字符）后组成的新字符串。
+
+例如，"ace" 是 "abcde" 的子序列，但 "aec" 不是 "abcde" 的子序列。
+两个字符串的 公共子序列 是这两个字符串所共同拥有的子序列。
+遇到最优解需要想到动态规划
+dp[i][j] 代表[0:i] text2[0:j] 最长长度
+*/
+
+func GetLongestCommonSubsequence (text1, text2 string) int {
+	dp := make ([][]int, len(text1)+1)
+	for i:=0; i<len(text1)+1; i++ {
+		dp[i] = make([]int, len(text2)+1)
+	}
+	for i:=1; i<=len(text1); i++ {
+		for j:=1; j<=len(text2); j++ {
+			if text1[i-1] == text2[j-1] {
+				dp[i][j] = dp[i-1][j-1]+1
+			} else {
+				dp[i][j] = int(math.Max(float64(dp[i-1][j]), float64(dp[i][j-1])))
+			}
+		}
+	}
+	return dp[len(text1)][len(text2)]
+}
+
+/*
+91. 解码方法
+一条包含字母 A-Z 的消息通过以下映射进行了 编码 ：
+
+'A' -> "1"
+'B' -> "2"
+...
+'Z' -> "26"
+求最多能有多少解码方法
+dp 大是因为 前两个字符也会有多种可能
+ */
+
+func DecodeAZ (text string) int {
+	dp := make([]int, len(text) + 1)
+	dp[0] = 1
+	for i:= 1; i <= len(text); i++ {
+		if text[i-1] != '0' {
+			dp[i] += dp[i-1]
+		}
+		if i > 1 && text[i-2] != '0' && (text[i-1]-'0' + (text[i-2]-'0') * 10) <= 26 {
+			dp[i] += dp[i-2]
+		}
+	}
+
+	return dp[len(text)]
+}
+
+/*
+最长重复子数组
+718. 最长重复子数组
+给两个整数数组 nums1 和 nums2 ，返回 两个数组中 公共的 、长度最长的子数组的长度 。 子数组是位置连续的
+动态规划
+ */
+func GetLongestSubArr (nums1,nums2 []int) []int {
+	dp := make([][]int, len(nums1)+1)
+
+	for i:=0; i< len(nums1)+1; i++ {
+		dp[i] = make([]int, len(nums2)+1)
+	}
+
+	maxEnd := 0
+	maxLen := 0
+	for i:=1; i<=len(nums1); i++ {
+		for j:=1; j<=len(nums2); j++ {
+			if nums1[i-1] == nums2[j-1] {
+				dp[i][j] = dp[i-1][j-1] + 1
+				if dp[i][j] > maxLen {
+					maxLen = dp[i][j]
+					maxEnd = i
+				}
+			}
+		}
+	}
+	println(maxEnd, maxLen)
+	start := maxEnd-maxLen
+	return nums1[start:maxEnd]
+}
+
+
+
+
+
 

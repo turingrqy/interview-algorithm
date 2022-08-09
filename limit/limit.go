@@ -27,6 +27,7 @@ func (self *TicketBucket) Take (count int64) int64 {
 		self.AvaliableNum = 0
 		return self.AvaliableNum
 	}
+
 	self.AvaliableNum -= count
 	self.Lock.Unlock()
 	return count
@@ -64,7 +65,7 @@ func (self *SlideWindow1) Check () bool {
 		return true
 	}
 
-	if timenow-self.queue[0] <= timenow {
+	if timenow-self.queue[0] <= self.windowTime {
 		return false
 	} else {
 		self.queue = self.queue[1:]
@@ -102,7 +103,7 @@ func (self *SlideWindow2) Init (slideTime int, windowTime int,limit int) {
 			self.lock.Lock()
 			self.head = self.head.Next()
 			itemCount := self.head.Value.(int)
-			self.limit -= itemCount
+			self.curCount -= itemCount
 			self.head.Value = 0
 			self.lock.Unlock()
 		}

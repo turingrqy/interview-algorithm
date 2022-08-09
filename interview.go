@@ -3,10 +3,9 @@ package main
 import (
 	"fmt"
 	"renqiyang/interview/begpack"
-	"renqiyang/interview/binary_search"
 	"renqiyang/interview/list"
 	"renqiyang/interview/other"
-	"renqiyang/interview/recursion_dynamic"
+	"renqiyang/interview/tree"
 )
 
 func main() {
@@ -189,7 +188,7 @@ func main() {
 	/*s:="aaabcefsdfedddabcefdklcdsa"
 	noduplen := other.GetNodupSubStrLen(s)
 	fmt.Println(fmt.Sprintf("no dup num=%d", noduplen))*/
-	num1_1 := list.ListNode{
+	/*num1_1 := list.ListNode{
 		3,
 		nil,
 	}
@@ -293,9 +292,7 @@ func main() {
 	println(fmt.Sprintf("testGrid = %+v", testGrid))
 
 
-	resMaxArr := other.GetFirstMaxFromRight([]int{1,5,3,6,4,8,9,10})
-	fmt.Println(resMaxArr)
-	other.CoverGrid(4, 0,1)
+
 	other.JustifyWord([]string{"This", "is", "an", "example", "of", "text", "justification."},16)
 	resMulti := other.MultiExceptself([]int{1,2,3,4,5})
 	fmt.Println(resMulti)
@@ -333,21 +330,134 @@ func main() {
 		printTmp = printTmp.Next
 	}
 	resNew := binary_search.GetNoDupNumInSortedDoubleArr([]int{1,2,2,3,3,4,4,5,5,6,6,7,7,8,8})
-	fmt.Println("resNew = ", resNew)
+	fmt.Println("resNew = ", resNew)*/
+	num1_1 := list.ListNode{
+		3,
+		nil,
+	}
+	num1_2 := list.ListNode{
+		5,
+		nil,
+	}
+	num1_3 := list.ListNode{
+		4,
+		nil,
+	}
+	num1_4 := list.ListNode{
+		2,
+		nil,
+	}
+	num1_5 := list.ListNode{
+		6,
+		nil,
+	}
+	num1_6 := list.ListNode{
+		1,
+		nil,
+	}
+	num1_1.Next = &num1_2
+	num1_2.Next = &num1_3
+	num1_3.Next = &num1_4
+	num1_4.Next = &num1_5
+	num1_5.Next = &num1_6
+
+	newHead := list.SortList(&num1_1)
+	printList(newHead)
+	other.GetLongestPalindrome("fdabadcedasdada")
+	arr1 := []int{1,2,3,3,3,3,4,5}
+	other.DeleteDupInSortedArr(&arr1)
+	println(fmt.Sprintf("arr=%v",arr1))
+	/*newHead := list.DeleteSameNodeInList(&num1_1)
+	printList(newHead)
+	testDupIntArr := []int{0,3,2,3,3,3}
+	res := binary_search.GetDupInArr(testDupIntArr)
+	println(fmt.Sprintf("GetDupInArr res=%d",res))
+
+	num2_1 := list.ListNode{
+		1,
+		nil,
+	}
+	num2_2 := list.ListNode{
+		2,
+		nil,
+	}
+	num2_3 := list.ListNode{
+		3,
+		nil,
+	}
+	num2_4 := list.ListNode{
+		4,
+		nil,
+	}
+	num2_5 := list.ListNode{
+		5,
+		nil,
+	}
+	num2_6 := list.ListNode{
+		6,
+		nil,
+	}
+	num2_1.Next = &num2_2
+	num2_2.Next = &num2_3
+	num2_3.Next = &num2_4
+	num2_4.Next = &num2_5
+	num2_5.Next = &num2_6
+
+	//reversed := list.ReversePartedList(&num2_1,2,4)
+	reversed := list.ReverseListByGroup(&num2_1, 2)
+	printList(reversed)
+
+	println(other.DecodeStr("a2[a2[ab]]c"))
+	resCombine := other.Subsets([]int{1,2,3})
+	println(fmt.Sprintf("resCombine=%v",resCombine))
+
+	println(other.GetMinRoadSumGridByDfs([][]int{{1,2,3},{4,5,6},{7,8,9}}))
+
+	resMaxArr := other.GetFirstMaxFromRight([]int{1,5,3,6,4,8,9,10})
+	fmt.Println(resMaxArr)
+	other.CoverGrid(4, 0,1)
+
+	upSet := other.GetAllSubUpSet([]int{4,6,7,7})
+	println(fmt.Sprintf("upSet=%v", upSet))
+
+	/*resCommon := recursion_dynamic.GetLongestCommonSubsequence("abcde", "bcde")
+	println(resCommon)
+	resArrCommon := recursion_dynamic.GetLongestSubArr([]int{1,4,5,6}, []int{4,5,6})
+	println(resArrCommon)*/
+
+	arr := []int64{1,3,5,7,9}
+	root := tree.CreateTreeOrderedArr(arr)
+	tree.GetSumRoad(root, []*tree.TreeNode{}, 9)
+	tree.PrintTreeBoarder(root)
+	println(tree.HasPathSumAnyWay(root,25))
+
+	coins := []int{10,2,7,6,5}
+	begpack.FindCombineSumEqTargetNoDup1(coins, 8)
+	begpack.FindCombineSumEqTargetNoDupInRArr(coins, 8)
+	TraverseMatrixArr := other.TraverseMatrix([][]int{{1,2,3,4},{5,6,7,8},{9,10,11,12}})
+	println(TraverseMatrixArr)
+	/*other.GetAllSubUpSet([]int{4,6,7,3,5})
+	res := recursion_dynamic.GetMaxLengthOfLIS([]int{4,6,7,3,5})
+	println(fmt.Sprintf("GetNumberofLIS=%v", res))
+	resD := recursion_dynamic.GetLongestCommonSubsequence("abce","afce")
+	fmt.Println(fmt.Sprintf("DecodeAZ1 count=%d", resD))*/
+	rootSum := &tree.TreeNode{Value: 1}
+	rootSum.Left = &tree.TreeNode{Value: 2}
+	rootSum.Right = &tree.TreeNode{Value: 3}
+	println(fmt.Sprintf("SumByTreePathNumberDfs=%d",tree.SumByTreePathNumberDfs(rootSum, 0)))
+	sortArr := []int64{5,3,6,7}
+	quickSort(sortArr, 0, 3)
+	println(fmt.Sprintf("quickSort arr=%v", sortArr))
 }
 
 
 //快排 最重要的特性在partition，左边小又变大
 func quickSort (arr []int64, low, high int) {
 
-	index := partition(arr, low, high)
-
-	if index > low + 1 {
-		quickSort(arr, low, index-1)
-	}
-
-	if index < high -1 {
+	if low < high {
+		index := partition(arr, low, high)
 		quickSort(arr, index+1, high)
+		quickSort(arr, low, index-1)
 	}
 }
 
@@ -433,6 +543,12 @@ func merge(left, right []int64) (result []int64) {
 	result = append(result, left[l:]...)
 	result = append(result, right[r:]...)
 	return
+}
+
+func printList (head *list.ListNode) {
+	for p:=head; p != nil; p = p.Next {
+		println(p.Value)
+	}
 }
 
 

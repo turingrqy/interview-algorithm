@@ -1,18 +1,22 @@
 package begpack
-// 不能重复使用硬币 最少使用硬币 要凑成的数是背包，硬币候选池是 物品，所以遍历背包的时候后要 从后向前
+
+import (
+	"fmt"
+	"sort"
+)
+
+// 不能重复使用硬币
+// 背包倒序是防止一个硬币被放进去多次，coin
 func CoinChangeDpNoDup(coins []int, amount int) int {
 	tmpArr := make([]int, amount+1)
 	tmpArr[0] = 0
 	for i:=0;i<len(coins);i++ {
 		for j:= amount;j>0;j-- {
 			tmpAmount := j - coins[i]
-			if tmpAmount < 0 {
-				continue
-			}
-			////min (tmpArr[j],tmpArr[j-coins[i]]+1)
+
 			if tmpAmount == 0 {
 				tmpArr[j] = 1
-			} else if tmpArr[j-coins[i]] > 0 {
+			} else if tmpAmount > 0 && tmpArr[j-coins[i]] > 0 {
 				tmpArr[j] = tmpArr[j-coins[i]]+1
 			}
 		}
@@ -27,7 +31,7 @@ func CoinChangeDpNoDup(coins []int, amount int) int {
 func CoinChangeDp(coins []int, amount int) int {
 	memo := make([]int, amount+1)
 	memo[0] = 0
-	//可以重复 背包可以从左到右遍历
+	//可以重复
 	for i:=1; i<= amount;i++ {
 		for j:=0; j< len(coins);j++ {
 			tmpAmount := i-coins[j]
@@ -75,7 +79,7 @@ func GetCoinChangeCombine (coins []int, target int) int {
 	return dpArr[target]
 }
 
-//求和等于target的组合 候选集数据可重复
+//求和等于target的组合 元素可重复使用
 func GetCombineSumEqTargetDp (arr []int, target int) [][]int {
 	dpArr := make([][][]int, target+1)
 	dpArr[0] = [][]int{}
@@ -83,7 +87,7 @@ func GetCombineSumEqTargetDp (arr []int, target int) [][]int {
 	for i:=0;i<len(arr);i++ {
 		for j:= 0;j<=target;j++ {
 			tmp := j-arr[i]
-			if tmp >=0 && len(dpArr[tmp]) > 0 {
+			if tmp >=0{
 
 				for k:=0;k<len(dpArr[tmp]);k++ {
 					tmpArr := []int{}
@@ -97,3 +101,129 @@ func GetCombineSumEqTargetDp (arr []int, target int) [][]int {
 	}
 	return dpArr[target]
 }
+
+func GetCombineSumNoDupEqTargetDp (arr []int, target int) [][]int {
+	dpArr := make([][][]int, target+1)
+	dpArr[0] = [][]int{}
+	dpArr[0] = append(dpArr[0],[]int{})
+	for i:= 0; i<len(arr); i++ {
+		for j:=target;j>0;j--{
+			tmp := j-arr[i]
+			if tmp >=0 && len(dpArr[tmp]) > 0{
+				for k:=0; k< len(dpArr[tmp]); k++ {
+					tmpArr := make([]int, 0)
+					tmpArr = append(tmpArr, dpArr[tmp][k]...)
+					tmpArr = append(tmpArr, arr[i])
+					dpArr[j] = append(dpArr[j], tmpArr)
+				}
+			} else {
+
+			}
+		}
+	}
+	return dpArr[target]
+}
+
+//给定一个元素不重复的数组，找出所有和为target的组合
+/*所有数字（包括 target）都是正整数。和选硬币是一样的 这个就是求所有的组合
+解集不能包含重复的组合，求所有组合只能是递归了 求组合数可以用背包 可以重复选择*/
+//可以每次都选择是使用下一个还是当前的方法 不可重复选择元素,数组中也没有重复元素
+
+
+
+func FindCombineSumEqTargetNoDup1 (arr[]int, target int) {
+	tmpArr := []int{}
+
+	FindCombineSumEqTargetNoDupDFS1(arr ,target, tmpArr, 0)
+}
+
+func FindCombineSumEqTargetNoDupDFS1 (arr[]int, target int, tmpArr []int, idx int) {
+	if target == 0 {
+		println(fmt.Sprintf("tmpArr=%v",tmpArr))
+		return
+	}
+	if idx == len(arr) {
+		return
+	}
+
+	//不选当前的元素
+	FindCombineSumEqTargetNoDupDFS1(arr, target, tmpArr, idx+1)
+	if target-arr[idx] >= 0 {
+		tmpArr = append(tmpArr, arr[idx])
+		FindCombineSumEqTargetNoDupDFS1(arr, target-arr[idx], tmpArr, idx+1)
+	}
+}
+
+func FindCombineSumEqTargetNoDup2 (arr[]int, target int , k int) {
+	tmpArr := []int{}
+
+	FindCombineSumEqTargetNoDupDFS2(arr ,target, tmpArr, 0, k)
+}
+
+func FindCombineSumEqTargetNoDupDFS2 (arr[]int, target int, tmpArr []int, idx int , k int) {
+	if len(tmpArr) == k && target ==0 {
+		println(fmt.Sprintf("arr=%v", tmpArr))
+		return
+	}
+
+	if len(tmpArr) > k || idx == len(arr) {
+		return
+	}
+	FindCombineSumEqTargetNoDupDFS2 (arr, target, tmpArr, idx+1, k)
+	if target-arr[idx] >= 0 {
+		tmpArr = append(tmpArr, arr[idx])
+		FindCombineSumEqTargetNoDupDFS2 (arr, target-arr[idx], tmpArr, idx+1, k)
+	}
+}
+
+
+//给定一个元素不重复的数组，找出所有和为target的组合
+/*所有数字（包括 target）都是正整数。和选硬币是一样的 这个就是求所有的组合
+解集不能包含重复的组合，求所有组合只能是递归了 求组合数可以用背包 可以重复选择*/
+//可以每次都选择是使用下一个还是当前的方法 可重复循选但是不能有负数
+func FindCombineSumEqTarget (arr[]int, target int) {
+	tmpArr := []int{}
+	FindCombineSumEqTargetDFS(arr ,target,tmpArr, 0)
+}
+
+func FindCombineSumEqTargetDFS (arr[]int, target int, tmpArr []int, idx int) {
+	if idx == len(arr) {
+		return
+	}
+	if target == 0 {
+		println(fmt.Sprintf("tmpArr=%v",tmpArr))
+		return
+	}
+	//不选当前的元素
+	FindCombineSumEqTargetDFS(arr, target, tmpArr, idx+1)
+	if target-arr[idx] >= 0 {
+		tmpArr = append(tmpArr, arr[idx])
+		FindCombineSumEqTargetDFS(arr, target-arr[idx], tmpArr, idx)
+	}
+}
+
+func FindCombineSumEqTargetNoDupInRArr (arr []int, target int) {
+	sort.Sort(sort.IntSlice(arr))
+	println(fmt.Sprintf("arr=%v", arr))
+	FindCombineSumEqTargetNoDupInRArrDfs(arr, target, 0, []int{})
+}
+
+func FindCombineSumEqTargetNoDupInRArrDfs (arr []int, target int, idx int, path []int) {
+	if target == 0 {
+		println(fmt.Sprintf("FindCombineSumEqTargetNoDupInRArrDfs=%+v", path))
+		return
+	}
+
+	if idx == len(arr) {
+		return
+	}
+
+
+	for i:=idx; i < len(arr); i++ {
+		if i > idx && arr[i] ==  arr[i-1] {
+			continue
+		}
+		FindCombineSumEqTargetNoDupInRArrDfs(arr, target-arr[i], i+1, append(path, arr[i]))
+	}
+}
+

@@ -18,8 +18,12 @@ type ListNode struct {
 
 // 链表中倒数不使用额外空间 快慢指针
 func GetLastKNode (head *ListNode, k int) *ListNode {
-	quick := head
-	for i := 1; i< k && quick != nil ; i++ {
+	hair:= &ListNode{Next: head}
+	quick := hair
+	for i:=0; i<k; i++ {
+		if quick == nil {
+			break
+		}
 		quick = quick.Next
 	}
 
@@ -27,91 +31,67 @@ func GetLastKNode (head *ListNode, k int) *ListNode {
 		return nil
 	}
 
-	for quick.Next != nil {
-		head = head.Next
+	for quick != nil  {
 		quick = quick.Next
+		hair = hair.Next
 	}
-
-	return head
+	return hair
 }
 
 func ReverseList (head *ListNode) *ListNode {
 	var prev *ListNode
-	var pHead = head
-	if head == nil || head.Next == nil {
-		return head
-	}
-	var next = head.Next
+	next := head.Next
+
 	for next != nil {
-		pHead.Next = prev
-		prev = pHead
-		pHead = next
+		head.Next = prev
+		prev = head
+		head = next
 		next = next.Next
 	}
-	pHead.Next = prev
-	return pHead
+	head.Next = prev
+	return head
 }
 
-func MergeSortList (head1 *ListNode, head2 *ListNode) *ListNode {
-	if head1 == nil {
-		return head2
-	}
-
-	if head2 == nil {
-		return head1
-	}
-
-	p1 := head1
-	p2 := head2
-	var tail *ListNode
-	var newHead *ListNode
-	if p1.Value <= p2.Value {
-		newHead = p1
-		tail = newHead
-		p1 = p1.Next
-		tail.Next = nil
-
-	} else {
-		newHead = p2
-		tail = newHead
-		p2 = p2.Next
-		tail.Next = nil
-	}
-	for p1 != nil && p2 != nil {
-
-		if p1.Value <= p2.Value {
-			tail.Next = p1
-			tail = p1
-			p1 = p1.Next
+func MergeSortedList (head1 *ListNode, head2 *ListNode) *ListNode {
+	hair := &ListNode{Next: nil}
+	tail := hair
+	for head1 != nil && head2 != nil {
+		if head1.Value < head2.Value {
+			tail.Next = head1
+			tail = head1
+			head1 = head1.Next
 			tail.Next = nil
-
 		} else {
-			tail.Next = p2
-			tail = p2
-			p2 = p2.Next
+			tail.Next = head2
+			tail = head2
+			head2 = head2.Next
 			tail.Next = nil
 		}
 	}
 
-	if p1 != nil {
-		tail.Next = p1
+	if head1 != nil {
+		tail.Next = head1
 	}
-	if p2 != nil {
-		tail.Next = p2
+	if head2 != nil {
+		tail.Next = head2
 	}
-	return newHead
+	return hair.Next
 }
+
 //有序链表中位数
 func GetMidInList (head *ListNode) *ListNode {
-	first := head
-	second := head
-
-	for second != nil && second.Next != nil  {
-		first = first.Next
-		second = second.Next.Next
+	if head == nil {
+		return nil
+	}
+	hair := &ListNode{Next: head}
+	slow := hair
+	fast := hair
+	for fast != nil && fast.Next != nil {
+		slow = slow.Next
+		fast = fast.Next.Next
 	}
 
-	return first
+	return slow
 }
 
 // 判断链表是否有环，快慢指针，如果快指针比慢指针差一步则下一次迭代两者会相遇，当差两步一次迭代后会变成差一步再次迭代相遇 2不当差3步的时候
@@ -181,74 +161,7 @@ func GetEnterNodeInRing (head *ListNode) *ListNode {
 	return nil
 }
 
-func GetMidNodeInList(head *ListNode) (*ListNode,*ListNode) {
-	if head == nil {
-		return nil, nil
-	}
 
-
-
-	first := head
-	second := head
-	var prev *ListNode
-
-	for second != nil && second.Next != nil {
-		prev = first
-		first = first.Next
-		second = second.Next.Next
-	}
-	if prev != nil {
-		prev.Next = nil
-	}
-	return prev, first
-}
-
-func merge (head1 *ListNode, head2 *ListNode) *ListNode {
-	if head1 == nil {
-		return head2
-	}
-
-	if head2 == nil {
-		return head1
-	}
-
-	var newHead *ListNode
-	var tail *ListNode
-	p1,p2 := head1, head2
-	if head1.Value > head2.Value {
-		newHead = head2
-		tail = newHead
-		p2 = head2.Next
-		tail.Next = nil
-	} else {
-		newHead = head1
-		tail = newHead
-		p1 = head1.Next
-		tail.Next = nil
-	}
-
-	for p1 != nil && p2 != nil {
-		if p1.Value < p2.Value {
-			tail.Next = p1
-			tail = p1
-			p1 = p1.Next
-			tail.Next = nil
-		} else {
-			tail.Next = p2
-			p2 = p2.Next
-			tail.Next = nil
-		}
-	}
-
-	if p1 != nil {
-		tail.Next = p1
-	}
-	if p2 != nil {
-		tail.Next = p2
-	}
-
-	return newHead
-}
 
 //给定两个有序链表的头指针head1和head2，打印两个链表的公共部分
 func PrintOrderedCommonList(head1 *ListNode, head2 *ListNode) {
@@ -272,62 +185,105 @@ func PrintOrderedCommonList(head1 *ListNode, head2 *ListNode) {
 
 // 删除中间节点还是快慢指针
 func RemoveMidNodeInList (head *ListNode) *ListNode {
-	if head.Next==nil{
+	if head == nil {
 		return nil
 	}
-	if head.Next.Next == nil {
-		return head.Next
+
+	hair := &ListNode{Next: head}
+	first := hair
+	prev :=  hair
+	second := hair
+	for second != nil && second.Next != nil {
+		prev = first
+		first = first.Next
+		second = second.Next.Next
 	}
-	curr := head
-	quick := head.Next.Next
-	for ;curr.Next!=nil && quick.Next.Next!=nil; {
-		curr = curr.Next
-		quick = quick.Next.Next
-	}
-	curr.Next = curr.Next.Next
-	return head
+
+	prev.Next = first.Next
+	first.Next = nil
+	return hair.Next
 }
+
 // 翻转部分链表
-func ReversePartList (head *ListNode, from,to int64) *ListNode {
-	var fpre,tPos *ListNode
-	p := head
-	len := int64(1)
-	for ;p!=nil;p=p.Next{
-		if len == from-1 {
-			fpre = p
+func ReversePartedList (head *ListNode, from,to int) *ListNode {
+	if to < from {
+		return nil
+	}
+	hair := &ListNode{Next: head}
+	pre := hair
+	endNode := hair
+
+	for i:= 0; i < to && endNode != nil; i++ {
+		if i == from-1 {
+			pre = endNode
 		}
-		if len == to+1 {
-			tPos = p
-		}
-		len++
+
+		endNode = endNode.Next
+	}
+	if endNode == nil {
+		return nil
 	}
 
-	if from <1 || to > len {
-		return head
-	}
-	var pre,curr *ListNode=tPos,nil
-	if fpre == nil {
-		curr = head
-	} else {
-		curr = fpre.Next
-	}
-	if curr.Next == nil {
-		return head
-	}
+	startNode := pre.Next
+	suffix := endNode.Next
+	pre.Next = nil
+	endNode.Next = nil
 
-	quick := curr.Next
-	for curr != tPos {
-		curr.Next = pre
-		pre=curr
-		curr = quick
-		quick = quick.Next
-	}
-	if fpre == nil {
-		return pre
-	}
-	fpre.Next = pre
-	return head
+	reverseList(startNode)
+	pre.Next = endNode
+	startNode.Next = suffix
+	return hair.Next
 }
+
+/*
+25. K 个一组翻转链表
+给你链表的头节点 head ，每 k 个节点一组进行翻转，请你返回修改后的链表。
+
+k 是一个正整数，它的值小于或等于链表的长度。如果节点总数不是 k 的整数倍，那么请将最后剩余的节点保持原有顺序。
+
+你不能只是单纯的改变节点内部的值，而是需要实际进行节点交换
+ */
+func ReverseListByGroup (head *ListNode, k int) *ListNode {
+	hair := &ListNode{Next: head}
+	prev := hair
+	for prev != nil {
+		tail := prev
+		for i:=0; i < k && tail != nil; i++ {
+			tail = tail.Next
+		}
+		if tail == nil {
+			break
+		}
+		var suffix *ListNode
+		suffix = tail.Next
+		startNode := prev.Next
+		prev.Next = nil
+		reverseList(startNode)
+		prev.Next = tail
+		if startNode != nil {
+			startNode.Next = suffix
+		}
+		prev =  startNode
+	}
+	return hair.Next
+}
+//头结点变为尾结点
+func reverseList (head *ListNode)  {
+	var prev *ListNode
+	var pHead = head
+	if head == nil || head.Next == nil {
+		return
+	}
+	var next = head.Next
+	for next != nil {
+		pHead.Next = prev
+		prev = pHead
+		pHead = next
+		next = next.Next
+	}
+	pHead.Next = prev
+}
+
 
 //两个倒序组成链表的
 func SumTwoList (l1 *ListNode, l2 *ListNode) *ListNode {
@@ -388,94 +344,51 @@ func mergeKSortedLists(lists []*ListNode) *ListNode {
 	left := mergeKSortedLists(lists[:half])
 	right:= mergeKSortedLists(lists[half:])
 
-	return mergeTwoSortedList(left, right)
-}
-
-func mergeTwoSortedList(head1 *ListNode, head2 *ListNode) *ListNode {
-	if head1 == nil {
-		return head2
-	}
-	if head2 == nil {
-		return head1
-	}
-
-	var newHead *ListNode
-	var tail *ListNode
-	var p1 *ListNode = head1
-	var p2 *ListNode = head2
-	if head1.Value < head2.Value {
-		newHead = head1
-		tail = newHead
-		p1 = head1.Next
-		tail.Next = nil
-	} else {
-		newHead = head2
-		tail = newHead
-		p2 = head2.Next
-		tail.Next = nil
-	}
-
-	for ;p1 != nil && p2 != nil; {
-		if p1.Value < p2.Value {
-			tail.Next = p1
-			tail = p1
-			p1 = p1.Next
-			tail.Next = nil
-		} else {
-			tail.Next = p2
-			tail = p2
-			p2 = p2.Next
-			tail.Next = nil
-		}
-	}
-	if p1 != nil {
-		tail.Next = p1
-	}
-	if p2 != nil {
-		tail.Next = p2
-	}
-	return newHead
+	return MergeSortedList(left, right)
 }
 
 
 func SortList(head *ListNode) *ListNode {
-	left, right := curList(head)
-	// 单个的链表不再切割 否则会一直切下去
-	if left != nil && left.Next != nil{
-		left = SortList(left)
+	if head == nil {
+		return nil
 	}
 
-	if right != nil && right.Next != nil{
-		right = SortList(right)
+	if head.Next == nil {
+		return head
 	}
-	return mergeTwoSortedList(left, right)
+
+	head1, head2 := curList(head)
+
+	left := SortList(head1)
+	right := SortList(head2)
+
+	return MergeSortedList(left, right)
 }
 
 // 利用快慢指针 找到链表中点
 func curList(head *ListNode)(*ListNode, *ListNode){
-	if head == nil{
-		return nil, nil
-	}
-	if head.Next == nil {
-		return head, nil
-	}
-	if head.Next != nil && head.Next.Next == nil {
-		headNext := head.Next
-		head.Next = nil
-		return head, headNext
-	}
-	fast := head
-	slow := head
-	var prev * ListNode
-	for fast != nil && fast.Next != nil{
-		fast = fast.Next.Next
-		prev = slow
+	hair :=  &ListNode{Next: head}
+	slow := hair
+	fast := hair
+	for fast != nil && fast.Next != nil {
 		slow = slow.Next
-
+		fast = fast.Next.Next
 	}
-	if prev != nil {
-		prev.Next = nil
-	}
+	newHead := slow.Next
+	slow.Next = nil
+	return hair.Next, newHead
+}
 
-	return head, slow
+func DeleteSameNodeInList (head *ListNode) *ListNode {
+	slow := head
+	quick := head.Next
+	for quick != nil {
+		if slow.Value != quick.Value {
+			slow.Next = quick
+			slow = quick
+		}
+		quick = quick.Next
+	}
+	slow.Next = quick
+	return head
 }

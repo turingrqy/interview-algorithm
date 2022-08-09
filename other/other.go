@@ -3,13 +3,15 @@ package other
 import (
 	"fmt"
 	"math"
+	"reflect"
 	"renqiyang/interview/tree"
 	"strconv"
+	"unsafe"
 )
 
 
-//两数相加之和
-func GetSumIndex (arr []int, target int)  {
+//两数相加之和 两数之和 找到所有的组合没有重复情况很简单直接map就好
+func GetTwoNumSumIndex (arr []int, target int)  {
 	indexMap := make(map[int]int)
 	for k,v :=range arr {
 		indexMap[v] = k
@@ -22,6 +24,27 @@ func GetSumIndex (arr []int, target int)  {
 	}
 }
 
+// 数组有重复的两数之和 找出所有组合
+func GetTwoNumSumEqualTargetNotUniqArr (arr []int, target int)  {
+	countMap := make(map[int]int)
+	for _,v :=range arr {
+		if _, ok := countMap[v]; !ok {
+			countMap[v] = 0
+		}
+		countMap[v]++
+	}
+
+	for k, _ := range countMap {
+		countMap[k] -=1
+		coTarget := target-k
+		if v, ok := countMap[coTarget]; ok && v > 0 {
+			countMap[coTarget] -=1
+			println(fmt.Sprintf("v1=%d, v2=%d", k, coTarget))
+		}
+	}
+
+}
+
 //s := arr[startIndex:endIndex]
 //将arr中从下标startIndex到endIndex-1 下的元素创建为一个新的切片
 //最长回文子串
@@ -29,25 +52,29 @@ func GetSumIndex (arr []int, target int)  {
 //动态规划 如果aba是 cabac也是
 //s[i+1,j-1]是回文的话 如果 s[i]==s[j] name s[i,j]也是
 func GetLongestPalindrome (s string) {
-	res := make([][]bool,0,len(s))
+	res := make([][]bool,len(s))
+	for i:=0; i<len(s);i++ {
+		res[i] = make([]bool,len(s))
+	}
 	ans := ""
-	//l 限制子串的长度 l+1 是当前子串的长度
-	for l:=0; l<len(s); l++ {
-		for i:=0;i+l < len(s);i++ {
-			//i和j代表不同长度子串的左边界和又边界
-			j := i+l
-			if l==0 {
-				res[i][j]= true
-			} else if l == 1 {
-				res[i][j]= true
-			} else {
-				if s[i] == s[j] {
-					res[i][j] = res[i+1][j-1]
-				}
+
+	for l:=1; l<=len(s); l++ {
+		for i:=0; i<=len(s)-l; i++ {
+			j := i+l-1
+
+			if l == 1  {
+				res[i][j] = true
+				ans = string(s[i])
+				continue
+			}
+			if l==2 && s[i]==s[j] {
+				res[i][j] = true
+				ans = s[i:i+l]
 			}
 
-			if res[i][j] && l+1 > len(ans) {
-				ans = s[i:i+l+1]
+			if s[i]==s[j] && res[i+1][j-1] {
+				res[i][j] = true
+				ans = s[i:i+l]
 			}
 		}
 	}
@@ -73,10 +100,6 @@ func GetMaxLenOfNoDupStr (s string) int {
 				max = sublen
 			}
 		} else {
-			sublen = right-left+1
-			if sublen > max {
-				max = sublen
-			}
 			for i:= left;i<=index;i++ {
 				delete(indexMap,s[i])
 			}
@@ -97,10 +120,10 @@ func GetMostbigCup (arr []int) int {
 	for;left <= right; {
 		height := 0
 		if arr[left] > arr[right] {
-			height = arr[left]
+			height = arr[right]
 			right--
 		} else {
-			height = arr[right]
+			height = arr[left]
 			left++
 		}
 
@@ -129,103 +152,61 @@ func GetUpstairsWaysNum (k int) int {
 }
 
 
-//
 
-var numMap = map[byte]bool{
-	'1':true,
-	'2':true,
-	'3':true,
-	'4':true,
-	'5':true,
-	'6':true,
-	'7':true,
-	'8':true,
-	'9':true,
-	'0':true,
-}
 //解码a2[a2[ab]]c
-func DecodeStr(str string) string {
+func DecodeStr (text string) string {
+	stack := tree.Stack{}
 
-	newStr := ""
-
-	for i:=0;i<len(str);i++ {
-		if _,ok := numMap[str[i]];ok {
-			stack := tree.Stack{}
-			var num int64
-			num,i = getNumbyStr(str,i)
-			stack.Push(num)
-			newsubStr := ""
-			needPush := true
+	for i:=0; i<len(text); i++ {
+		if DecodeStrIsNumber(text[i]) {
+			stack.Push(text[i])
+		} else if text[i] != ']' {
+			stack.Push(string(text[i]))
+		} else {
+			tmpStr := ""
 			for !stack.IsEmpty() {
-
-				if _,ok := numMap[str[i]];ok {
-					var repeatNum int64
-					repeatNum,i = getNumbyStr(str,i)
-					stack.Push(repeatNum)
-				} else if str[i] == '[' {
-					i++
-					continue
-				} else if str[i] == ']' {
-					needPush = false
-					value := stack.Pop()
-					subSubStr := value.(string)
-					if newsubStr != "" {
-						subSubStr =subSubStr+newsubStr
-					}
-
-
-					value = stack.Pop()
-					srepeatNum := value.(int64)
-					newsubStr = ""
-					for j:=0;j< int(srepeatNum);j ++ {
-						newsubStr =subSubStr+newsubStr
-					}
-					i++
-					suffix :=""
-					suffix,i = getSubStr(str,i)
-					newsubStr = newsubStr+suffix
-				} else {
-					var subStr string
-					subStr,i = getSubStr(str,i)
-					if needPush {
-						stack.Push(subStr)
-					} else {
-						newsubStr += subStr
-					}
+				sub := stack.Pop()
+				subStr := sub.(string)
+				if subStr == "[" {
+					break
 				}
+				tmpStr = subStr+tmpStr
 			}
-			newStr +=newsubStr
-		} else {
-			newStr += string(str[i])
+			// 弹出数字
+			dupNum := 0
+			scale := 0
+			for !stack.IsEmpty() {
+				subStr := stack.Peek()
+				subByte, ok := subStr.(byte)
+				if !ok || !DecodeStrIsNumber(subByte) {
+					break
+				}
+				stack.Pop()
+				tmpInt := int(subByte-'0')
+				dupNum = tmpInt * int(math.Pow(10,float64(scale))) + dupNum
+			}
+			finalStr := ""
+			for i:=0; i < dupNum; i++ {
+				finalStr += tmpStr
+			}
+			stack.Push(finalStr)
 		}
 	}
-	return newStr
+	res := ""
+	for !stack.IsEmpty() {
+		sub := stack.Pop()
+		subStr := sub.(string)
+		res = subStr + res
+	}
+	return res
+}
+func DecodeStrIsNumber (v byte) bool {
+	if v - '0'<= 9 {
+		return true
+	}
+	return false
 }
 
-func getNumbyStr (str string, i int) (int64,int) {
-	numStr := ""
-	for;i<len(str);i++ {
-		if _,ok := numMap[str[i]];ok {
-			numStr += string(str[i])
-		} else {
-			break
-		}
-	}
-	num,_:=strconv.ParseInt(numStr,10,64)
-	return num,i
-}
-func getSubStr (str string, i int) (string,int) {
-	numStr := ""
-	for;i<len(str);i++ {
-		if _,ok := numMap[str[i]];!ok && str[i] != '[' && str[i] != ']' {
-			numStr += string(str[i])
-		} else {
-			break
-		}
-	}
-	//num,_:=strconv.ParseInt(numStr,10,64)
-	return numStr,i
-}
 //是否是回文数
 func IsPalindromeNum (num int) bool  {
 	prefix := num
@@ -243,34 +224,29 @@ func IsPalindromeNum (num int) bool  {
 }
 
 //删除数组中的重复元素
-func DeleteDupInArr (arr []int) {
-	prev := 0
-	next := prev+1
-	for ; next < len(arr); {
-		for ;next < len(arr)-1;  {
-			if arr[next] == arr[prev] {
-				next ++
-			} else {
-				break
-			}
-		}
-
-		if next > len(arr) {
-			break
-		}
-		dupNum := next-prev-1
-		for ;next<len(arr);next++ {
-			arr[next-dupNum] = arr[next]
-
-		}
-		prev++
-		next = prev+1
+// 删除有序数组中的重复项 不能使用额外空间 如果不是排序的可以先排序
+func DeleteDupInSortedArr (arr *[]int) {
+	if len(*arr) <= 1 {
+		return
 	}
+	//慢指针
+	i:=0
+	//快指针
+	j:=1
+	for ;j<len(*arr);j++ {
+		if (*arr)[i] != (*arr)[j] {
+			i++
+			(*arr)[i] = (*arr)[j]
+		}
+	}
+	originSliceHeader := (*reflect.SliceHeader)(unsafe.Pointer(arr))
+	originSliceHeader.Len = i+1
+	arr = (*[]int)(unsafe.Pointer(originSliceHeader))
 }
 
 // b^0=b
 // a^b^a = b^(a^a)=b^0=b
-//数组中只出现一次的数字
+//数组中只出现一次的数字 其他数字成对出现
 //相同取0，相异取1。（二进制）
 /*不重复的数字有两个，剑指offer上面也有“找出数组中只出现了一次的两个数”，解决办法是先遍历一遍数组，异或得到一个数N，这个数就是只出现一次的那两个数异或的结果，然后找到N最低为1的位（假设是m位），再次遍历数组，按m位为1和为0将数组分为两个数组，此时只出现一次的两个数就被分到了不同的组，然后对每个组按照（1）的方法找出来就可以了，代码如下：
 ————————————————
@@ -315,98 +291,7 @@ func permuteDfs (nums []int, path []int ,depth int, usedMap map[int]bool, res*[]
 	}
 }
 
-//给定不同的硬币种类 选择最少的硬币数量组合为需要的钱
-//排列组合搜索查找找路径都应该考虑树形图解法这个和全排列是类似的 也是常说的回溯法
-//最重要的几个点是要有 1.递归终止的条件 2.当前遍历的深度
-/*输入：coins = [1, 2, 5], amount = 11
-输出：3
-解释：11 = 5 + 5 + 1*/
-func CoinChangeNormal(coins []int, amount int) int {
-	minNum := math.MaxInt32
-	CoinChangeDFS(coins, amount, 0, &minNum)
-	return minNum
-}
-
-func CoinChangeDFS (coins []int, amount int, depth int, minDepth *int) {
-	if amount == 0 {
-		if *minDepth > depth {
-			*minDepth = depth
-		}
-		return
-	} else if amount < 0 {
-		return
-	}
-
-	for i := 0; i< len(coins); i++ {
-		CoinChangeDFS(coins, amount-coins[i], depth + 1, minDepth)
-	}
-}
-
-
-//动态规划自底向上
-func CoinChangeDp(coins []int, amount int) int {
-	memo := make([]int, amount+1)
-	memo[0] = 0
-
-	for i:=1; i<= amount;i++ {
-		for j:=0; j< len(coins);j++ {
-			tmpAmount := i-coins[j]
-			if tmpAmount == 0 {
-				memo[i] = 1
-				break
-			}else if  tmpAmount >0 && memo[tmpAmount]>0  {
-				memo[i] = memo[tmpAmount]+1
-			}
-		}
-	}
-
-	return memo[amount]
-}
-//还有一种是求组合数
-
-
-
-//给定一个元素不重复的数组，找出所有和为target的组合
-/*所有数字（包括 target）都是正整数。和选硬币是一样的 这个就是求所有的组合
-解集不能包含重复的组合，求所有组合只能是递归了 求组合数可以用背包*/
-//可以每次都选择是使用下一个还是当前的方法
-func FindCombineSumEqTarget (arr[]int, target int) [][]int {
-	res := &[][]int{}
-	tmpArr := []int{}
-	FindCombineSumEqTargetDFS(arr,target,tmpArr, 0,res)
-	return *res
-}
-
-func FindCombineSumEqTargetDFS (arr[]int, target int ,tmpArr []int, idx int, res *[][]int) {
-	if target == 0 {
-		//终止条件 找到了一个组合
-		tmpRes := []int{}
-		tmpRes = append(tmpRes, tmpArr...)
-		*res = append(*res,tmpRes)
-		return
-	}
-	if idx == len(arr) {
-		//候选集被选完了
-		return
-	}
-
-	/*这里并不是每次从头开始选了，从idx 初先选
-	for i:=0;i<len(arr);i++ {
-		tmpArr = append(tmpArr, arr[i])
-		FindCombineSumEqTargetDFS (arr, target-arr[i], tmpArr, res)
-		tmpArr = tmpArr[:len(tmpArr)-1]
-	}*/
-	//下一次从下一个数开始选
-	// 不取当前的数 取下一个数
-	FindCombineSumEqTargetDFS (arr, target, tmpArr, idx+1, res)
-	if target-arr[idx] >=0 {
-		tmpArr = append(tmpArr, arr[idx])
-		//
-		FindCombineSumEqTargetDFS (arr, target-arr[idx], tmpArr, idx, res)
-		tmpArr = tmpArr[:len(tmpArr)-1]
-	}
-}
-
+// 子集
 func Subsets(nums []int) [][]int {
 	cur := []int{}
 	res := [][]int{}
@@ -425,6 +310,30 @@ func SubSetsDFS (nums []int, depth int, cur []int, res*[][]int) {
 	SubSetsDFS(nums, depth+1, cur, res)
 	cur = append(cur, nums[depth])
 	SubSetsDFS(nums, depth+1, cur, res)
+}
+
+//递增子序列
+func GetAllSubUpSet (nums []int) {
+	cur := []int{}
+	GetAllSubUpSetDfs(nums, 0, cur)
+}
+// 有重复的元素，可以选择，但是组合不能重复
+func GetAllSubUpSetDfs (nums []int, depth int, cur []int) {
+	if depth == len(nums) {
+		if len(cur) >= 2 {
+			println(fmt.Sprintf("GetAllSubUpSetDfs=%v", cur))
+		}
+		return
+	}
+
+	if len(cur) == 0 || cur[len(cur)-1] != nums[depth] {
+		GetAllSubUpSetDfs(nums, depth+1, cur)
+	}
+
+	if len(cur) == 0 || nums[depth] >= cur[len(cur)-1] {
+		cur = append(cur, nums[depth])
+		GetAllSubUpSetDfs(nums, depth+1, cur)
+	}
 }
 
 
@@ -457,6 +366,32 @@ func GetMinRoadSumGrid (arr[][]int, rows,col int) (minSum int) {
 	}
 	minSum = arr[rows-1][col-1]
 	return
+}
+
+func GetMinRoadSumGridByDfs (arr[][]int) int {
+	row := 0
+	col := 0
+	min := math.MaxInt32
+	GetMinRoadSumGridDfs(arr, row, col,0, &min)
+	return min
+}
+
+func GetMinRoadSumGridDfs (arr [][]int, row, col, sum int, min *int) {
+	if row == len(arr)-1 && col == len(arr[0])-1 {
+		sum += arr[row][col]
+		if sum < *min {
+			*min = sum
+		}
+		return
+	}
+	sum += arr[row][col]
+	if row + 1 <= len(arr)-1 {
+		GetMinRoadSumGridDfs(arr, row+1, col, sum, min)
+	}
+	if col + 1 <= len(arr[0])-1 {
+		GetMinRoadSumGridDfs(arr, row, col+1, sum, min)
+	}
+
 }
 
 
@@ -499,7 +434,7 @@ func CatchRainQ (arr[]int) int {
 	maxLeft := []int{}
 	maxRight := make([]int,0,len(arr))
 	maxLeft[0] = arr[0]
-	maxRight[len(arr)-1] = 0
+	maxRight[len(arr)-1] = arr[len(arr)-1]
 	for i:=1;i<len(arr)-1;i++ {
 		if arr[i] > maxLeft[i-1] {
 			maxLeft = append(maxLeft, arr[i])
@@ -541,21 +476,22 @@ func largestRectangleArea(heights []int) int {
 	for i:=0;i<len(heights);i++ {
 		var left,right = i,i
 
-		for ;left -1 >=0; {
-			if heights[left-1] >= heights[i] {
-				left --
-			} else {
+		for left < len(heights) {
+			if heights[left] >= heights[i] {
+				left--
+			} else{
 				break
 			}
 		}
-		for ;right +1 < len(heights); {
-			if heights[right+1] >= heights[i] {
+
+		for right < len(heights) {
+			if heights[right] >= heights[i] {
 				right++
 			} else {
 				break
 			}
 		}
-		area := (right-left+1) * heights[i]
+		area := heights[i] * (right-left-1)
 		if area > maxArea {
 			maxArea = area
 		}
@@ -563,102 +499,88 @@ func largestRectangleArea(heights []int) int {
 	return maxArea
 }
 //单调栈解法
-//有一群牛站成一排，每头牛都是面朝右的，每头牛可以看到他右边身高比他小的牛。给出每头牛的身高，要求每头牛能看到的牛的总数。
-//给出一个序列，求出一个子序列，使得这个序列中的最小值乘以这个序列的和的值最大
-type boarderItem struct {
-	Height int
-	index int
-}
-func largestRectangleAreaWithStack(heights []int) int {
-	maxArea := 0
-	stack := tree.Stack{}
-	leftBorderArr := make([]int,len(heights))
-	rightBoarderArr := make([]int,len(heights))
+//有一群牛站成一排，每头牛都是面朝右的，每头牛可以看到他右边身高比他小的牛。给出每头牛的身高，要求每头牛能看到的牛的总数。右边第一个比他大的数
+//给出一个序列，求出一个子序列，使得这个序列中的最小值乘以这个序列的和的值最大 左边第一个比他小的数， 右边第一个比他小数
 
-	for i:= 0; i< len(heights);i++ {
-		tmpItem := boarderItem{}
-		tmpItem.Height = heights[i]
-		tmpItem.index = i
+//On 每个元素只会入栈出站一次 2n on
+func largestRectangleAreaWithStack(heights []int) int {
+	leftBoarder := make([]int, len(heights))
+	rightBoarder := make([]int, len(heights))
+
+	stack := tree.Stack{}
+	for i := 0; i < len(heights); i++ {
+		for !stack.IsEmpty() {
+			tmp := stack.Peek()
+			lastIndex :=  tmp.(int)
+			if heights[lastIndex] >= heights[i] {
+				stack.Pop()
+			} else {
+				break
+			}
+		}
 		if stack.IsEmpty() {
-			leftBorderArr[i] = -1
+			leftBoarder = append(leftBoarder, -1)
 		} else {
-			for !stack.IsEmpty() {
-				v := stack.Pop()
-				item := v.(boarderItem)
-				if item.Height < heights[i] {
-					stack.Push(item)
-					stack.Push(tmpItem)
-					leftBorderArr[i] = item.index
-					break
-				}
-			}
-			if stack.IsEmpty() {
-				stack.Push(tmpItem)
-				leftBorderArr[i] = -1
-			}
+			tmp := stack.Peek()
+			lastIndex :=  tmp.(int)
+			leftBoarder = append(leftBoarder, lastIndex)
+			stack.Push(i)
 		}
 	}
 	stack = tree.Stack{}
-	for j:= len(heights)-1; j>=0 ;j++ {
-		tmpItem := boarderItem{}
-		tmpItem.Height = heights[j]
-		tmpItem.index = j
+	for j := len(heights)-1; j >=0; j-- {
+		for !stack.IsEmpty() {
+			tmp := stack.Peek()
+			lastIndex :=  tmp.(int)
+			if heights[lastIndex] >= heights[j] {
+				stack.Pop()
+			} else {
+				break
+			}
+		}
 		if stack.IsEmpty() {
-			rightBoarderArr[j] = len(heights)
+			rightBoarder = append(rightBoarder, len(heights))
 		} else {
-			for !stack.IsEmpty() {
-				v := stack.Pop()
-				item := v.(boarderItem)
-				if item.Height < heights[j] {
-					stack.Push(item)
-					stack.Push(tmpItem)
-					rightBoarderArr[j] = item.index
-					break
-				}
-			}
-			if stack.IsEmpty() {
-				stack.Push(tmpItem)
-				leftBorderArr[j] = len(heights)
-			}
+			tmp := stack.Peek()
+			lastIndex :=  tmp.(int)
+			rightBoarder = append(rightBoarder, lastIndex)
+			stack.Push(j)
 		}
 	}
-	for i:=0;i<len(heights);i++ {
-		area := (rightBoarderArr[i]-leftBorderArr[i]-1)*heights[i]
-		if area>maxArea{
-			maxArea= area
+	maxArea := 0
+	for k:=0; k<len(heights); k++ {
+		area := (rightBoarder[k]-leftBoarder[k]) -1 * heights[k]
+		if area > maxArea {
+			maxArea = area
 		}
 	}
-	return  maxArea
+	return maxArea
 }
 //无序数组输出每个元素右边第一个比他大的元素
 func GetFirstMaxFromRight (arr []int) []int {
-	stack := []boarderItem{}
-	res := make([]int, len(arr))
-	for i:= 0; i< len(arr);i++ {
-		tmp := boarderItem{
-			arr[i],
-			i,
-		}
-		if len(stack) == 0 {
+	rightBoarder := make([]int, len(arr))
+	stack := tree.Stack{}
 
-			stack = append(stack, tmp)
-		} else {
-			for len(stack) >0 {
-				if arr[i] > stack[len(stack)-1].Height {
-					res[stack[len(stack)-1].index] = arr[i]
-					stack = stack[:len(stack)-1]
-				}else {
-					break
-				}
+	for i := len(arr)-1; i>=0; i-- {
+		for !stack.IsEmpty() {
+			tmp := stack.Peek()
+			tmpInt :=  tmp.(int)
+			if arr[tmpInt] <= arr[i] {
+				stack.Pop()
+			} else {
+				break
 			}
-			stack = append(stack,tmp)
+		}
+		if stack.IsEmpty() {
+			rightBoarder[i] = -1
+		} else {
+			tmp := stack.Peek()
+			tmpInt := tmp.(int)
+			rightBoarder[i] = tmpInt
+			stack.Push(i)
 		}
 	}
-	for len(stack) > 0 {
-		res[stack[len(stack)-1].index] = -1
-		stack = stack[0:len(stack)-1]
-	}
-	return res
+	return rightBoarder
 }
 
 
@@ -744,23 +666,6 @@ func GetLongestUpInMemo(arr []int, i int, dp *[]int) int {
 	return (*dp)[i]
 }*/
 
-
-//数组的所有子集 字符串的所有子串？ 这个得看个常规方法
-func GetAllSubset (nums []int64) [][]int64 {
-	res := [][]int64{}
-	standardNum := (1 << len(nums))-1
-	for i:=0; i<= standardNum;i++ {
-		tmp := []int64{}
-		for j := 0; j < len(nums);j++ {
-			if (i&(1<<j)) > 0 {
-				tmp = append(tmp,nums[j])
-			}
-		}
-		res = append(res, tmp)
-	}
-	return res
-}
-
 //todo 200.岛屿数量
 type point struct {
 	x,y int
@@ -812,48 +717,75 @@ func GetIsLandNum(intMap [][]int) int {
 
 //括号生成
 
-func GenerateParenthesis (target int) ([]string) {
-	res := &([]string{})
-	GenerateParenthesisDfs(0,target,'(',[]byte{},res)
-	return *res
+func GenerateParenthesis (target int) []string {
+	path := make([]byte, 2*target)
+	res := make([]string,0,0)
+	GenerateParenthesisDfs(path, 0, 0, target, &res)
+	return res
 }
-func GenerateParenthesisDfs (n, target int,v byte, tmpByte []byte, res *[]string) {
-	tmpByte = append(tmpByte,v)
-	if n == target*2-1 {
-		if checkParenthesisValid(tmpByte) {
-			*res = append(*res, string(tmpByte))
-		}
+func GenerateParenthesisDfs (path []byte, open, close, target int, res *[]string) {
+	if open == target && close == target {
+		*res = append(*res, string(path))
 		return
 	}
-	GenerateParenthesisDfs (n+1, target,'(', tmpByte,res)
 
-	GenerateParenthesisDfs (n+1, target,')', tmpByte,res)
+	if open < target {
+		path =  append(path, '(')
+		GenerateParenthesisDfs(path, open+1, close, target, res)
+		path = path[:len(path)-1]
+	}
+
+	if close < open {
+		path =  append(path, ')')
+		GenerateParenthesisDfs(path, open, close+1, target, res)
+		path = path[:len(path)-1]
+	}
 }
 
 func checkParenthesisValid (tmpArr []byte) bool {
-	stack := tree.Stack{}
-	i:=0
-	for ;i<len(tmpArr);i++ {
+	balance := 0
+	for i:=0; i < len(tmpArr); i++ {
 		if tmpArr[i] == '(' {
-			stack.Push('(')
+			balance++
+		} else if tmpArr[i] == ')' {
+			balance--
+		}
+
+		if balance < 0 {
+			return false
+		}
+	}
+	return balance == 0
+}
+/*
+给你一个只包含 '(' 和 ')' 的字符串，找出最长有效（格式正确且连续）括号子串的长度。
+保证最后一个无效的右括号在栈底
+ */
+
+func GetLongestValidParenthesis (tmpStr string) int {
+	stack := tree.Stack{}
+	maxLen := 0
+	stack.Push(-1)
+	for k, v := range tmpStr {
+		if v == '(' {
+			stack.Push(k)
 		} else {
-			if !stack.IsEmpty() {
-				v := stack.Pop()
-				testByte := byte(v.(int32))
-				if testByte != '(' {
-					return false
-				}
+			stack.Pop()
+			if stack.IsEmpty() {
+				stack.Push(k)
 			} else {
-				return false
+				tmpVal := stack.Peek()
+				tmpInt := tmpVal.(int)
+				maxLen = int(math.Max(float64(maxLen), float64(k-tmpInt)))
 			}
 		}
 	}
-	if stack.IsEmpty() && i == len(tmpArr) {
-		return true
-	}
-	return false
+	return maxLen
 }
+
+
 /*
+最小覆盖子串
 给你一个字符串 s 、一个字符串 t 。返回 s 中涵盖 t 所有字符的最小子串。如果 s 中不存在涵盖 t 所有字符的子串，则返回空字符串 "" 。
 
 注意：如果 s 中存在这样的子串，我们保证它是唯一的答案。
@@ -861,60 +793,57 @@ func checkParenthesisValid (tmpArr []byte) bool {
 来源：力扣（LeetCode）
 链接：https://leetcode-cn.com/problems/minimum-window-substring
 著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。
+滑动窗口解法
 */
 func MinWindow(s string, t string) string {
-	charactorCursorMap := map[byte]int{}
-	charactorPosition := map[byte][]int{}
+	ansLen := math.MaxInt32
+	ansL, ansR := -1, -1
+	oriCnt := make(map[byte]int, 0)
 
+	for k:=0; k < len(t); k++ {
+		oriCnt[t[k]]++
+	}
 
-	for i:=0; i< len(t);i++ {
-		charactorCursorMap[t[i]] =0
-		charactorPosition[t[i]] = []int{}
-	}
-	for i:=0; i< len(s);i++ {
-		if _,ok:=charactorPosition[s[i]]; ok{
-			charactorPosition[s[i]] = append(charactorPosition[s[i]], i)
-		}
-	}
-	/*shortest := math.MaxInt32
-	for _,v:=range charactorPosition {
-		if len(v) < shortest {
-			shortest = len(v)
-		}
-	}*/
-	var minPosByte byte = t[0]
-	needMvCursor := -1
-	var mindistance = math.MaxInt32
-	resPosStart,resPosEnd := 0,0
-	for needMvCursor +1 < len(charactorPosition[minPosByte]) {
-		charactorCursorMap[minPosByte] = needMvCursor +1
-		minPos := math.MaxInt32
-		maxPos := math.MinInt32
-		for k,cur := range charactorCursorMap {
-			if charactorPosition[k][cur] > maxPos {
-				maxPos = charactorPosition[k][cur]
+	tmpCnt := make(map[byte]int, 0)
+	check := func () bool {
+		for k, v := range oriCnt {
+			tmp, ok := tmpCnt[k]
+			if !ok {
+				return false
 			}
-			if charactorPosition[k][cur] < minPos {
-				minPos = charactorPosition[k][cur]
-				minPosByte = k
-				needMvCursor = cur
+			if tmp < v {
+				return false
 			}
 		}
-		distance := maxPos - minPos
-		if distance <mindistance {
-			mindistance = distance
-			resPosStart = minPos
-			resPosEnd = maxPos
+		return true
+	}
+
+	for l,r := 0,0; r < len(s); r++ {
+		if _,ok := oriCnt[s[r]]; ok {
+			tmpCnt[s[r]]++
+		}
+
+		for check() && l <= r {
+			tmpLen :=  r-l+1
+			if tmpLen < ansLen {
+				ansLen = tmpLen
+				ansL, ansR = l, r
+			}
+
+			if _,ok := tmpCnt[s[l]]; ok {
+				tmpCnt[s[l]]--
+			}
+			l++
 		}
 	}
 
-	return s[resPosStart:resPosEnd+1]
+	return s[ansL:ansR+1]
 }
 
 /*给定一个 n × n 的二维矩阵 matrix 表示一个图像。请你将图像顺时针旋转 90 度。
 
 你必须在 原地 旋转图像，这意味着你需要直接修改输入的二维矩阵。请不要 使用另一个矩阵来旋转图像。
-
+先上下交换，再对角线交换
 来源：力扣（LeetCode）
 链接：https://leetcode-cn.com/problems/rotate-image
 著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。*/
@@ -997,12 +926,11 @@ func findTargetSumWaysDfs(nums []int, sum int, target ,depth int,ways *int) {
 		return
 	}
 	//两次选择
-	sum += nums[depth]
-	findTargetSumWaysDfs(nums, sum, target,depth+1,ways)
-	sum -= nums[depth]
-	sum -= nums[depth]
-	findTargetSumWaysDfs(nums, sum, target,depth+1,ways)
-	sum += nums[depth]
+
+	findTargetSumWaysDfs(nums, sum+nums[depth], target,depth+1,ways)
+
+	findTargetSumWaysDfs(nums, sum-nums[depth], target,depth+1,ways)
+
 }
 
 // 不同路径
@@ -1074,7 +1002,7 @@ func uniquePathsWithObstaclesDFS(obstacleGrid [][]int, curRow,curCol int, ways *
 	}
 }
 
-//最长连续序列，不要求在数组中连续
+//最长连续序列，不要求在数组中连续 不要求相对位置
 // 可以先进行排序再搜索连续序列
 // O(n)的算法
 func longestConsecutive(nums []int) int {
@@ -1102,6 +1030,8 @@ func longestConsecutive(nums []int) int {
 	}
 	return max
 }
+
+
 //矩阵传染 target =2 start (i,j) source=3
 func SpreadGrid (arr[][] int, target int, source int, startI,startJ int ) {
 	dp := [][]int{}
@@ -1129,57 +1059,6 @@ func SpreadGrid (arr[][] int, target int, source int, startI,startJ int ) {
 		}
 	}
 }
-//贪心算法
-type peopleProfit  struct {
-	Profit int
-	Num int
-}
-func GetMaxProfit (peopleProfits []peopleProfit, cap[] int) int {
-	QuickSort(peopleProfits, 0, len(peopleProfits)-1)
-	memMap := make(map[int]bool)
-	maxProfit := 0
-	for i := 0; i< len(cap);i++ {
-		for j := 0; j< len(peopleProfits);j++ {
-			if _,ok := memMap[j];!ok {
-				if peopleProfits[j].Num <= cap[i] {
-					maxProfit += peopleProfits[j].Profit
-					memMap[j] = true
-				}
-			}
-		}
-	}
-	return maxProfit
-}
-
-func QuickSort (profit []peopleProfit, low, high int) {
-	index := partition(profit, low, high)
-	QuickSort(profit, index+1, high)
-	QuickSort(profit, low, index-1)
-}
-
-func partition(profit []peopleProfit, low, high int) int {
-	i:= low
-	j := high
-
-	for i<j {
-		for ;j>i;j-- {
-			if profit[j].Profit > profit[low].Profit {
-				break
-			}
-		}
-		for ;i<j;i++ {
-			if profit[i].Profit < profit[low].Profit {
-				break
-			}
-		}
-		if i<j {
-			profit[j], profit[i] = profit[i],profit[j]
-		}
-	}
-
-	profit[i],profit[low] = profit[low], profit[i]
-	return i
-}
 
 //棋盘覆盖问题
 func CoverGrid (size int, bc,br int) {
@@ -1187,25 +1066,26 @@ func CoverGrid (size int, bc,br int) {
 	for i:= 0; i< size;i++ {
 		Grid[i] = make([]int, size)
 	}
-
-	CoverGridPartition(Grid, 0,0,bc,br,size,0)
+	num := 0
+	CoverGridPartition(Grid, 0,0,bc,br,size,&num)
 	for i:= 0; i< size;i++ {
 		println(fmt.Sprintf("res=%+v", Grid[i]))
 	}
 }
 
-func CoverGridPartition (Grid [][]int,sc, sr, bc, br,size,num int) {
+func CoverGridPartition (Grid [][]int,sc, sr, bc, br,size int, num *int) {
 	if size == 1 {
 		return
 	}
 	newSize := size/2
-	num++
+	*num++
+	t := *num
 
 	if bc < sc + newSize && br < sr + newSize {
 		//block 点在当前的分区内
 		CoverGridPartition(Grid, sc, sr, bc, br, newSize, num)
 	} else {
-		Grid[sr + newSize-1][sc + newSize-1] = num
+		Grid[sr + newSize-1][sc + newSize-1] = t
 		CoverGridPartition(Grid, sc, sr, sc + newSize-1, sr + newSize-1, newSize, num)
 	}
 
@@ -1213,7 +1093,7 @@ func CoverGridPartition (Grid [][]int,sc, sr, bc, br,size,num int) {
 		CoverGridPartition(Grid, sc + newSize, sr, bc, br, newSize, num)
 	} else {
 		//左下角覆盖
-		Grid[sr + newSize-1][sc + newSize] = num
+		Grid[sr + newSize-1][sc + newSize] = t
 		CoverGridPartition(Grid, sc + newSize, sr, sc + newSize, sr + newSize-1, newSize, num)
 	}
 
@@ -1221,14 +1101,14 @@ func CoverGridPartition (Grid [][]int,sc, sr, bc, br,size,num int) {
 		CoverGridPartition(Grid, sc, sr + newSize, bc, br, newSize, num)
 	} else {
 		//右上角覆盖
-		Grid[sr + newSize][sc + newSize-1] = num
+		Grid[sr + newSize][sc + newSize-1] = t
 		CoverGridPartition(Grid, sc, sr + newSize, sc + newSize-1, sr + newSize, newSize, num)
 	}
 
 	if br >=sr + newSize && bc >= sc +newSize {
 		CoverGridPartition(Grid, sc + newSize, sr + newSize, bc, br, newSize, num)
 	} else {
-		Grid[sr + newSize][sc +newSize] = num
+		Grid[sr + newSize][sc +newSize] = t
 		CoverGridPartition(Grid, sc + newSize, sr + newSize, sc +newSize, sr + newSize, newSize, num)
 	}
 }
@@ -1297,6 +1177,275 @@ func JustifyWord (words []string, cap int)  {
 		println(str)
 	}
 }
+
+/*
+给你一个整数数组 nums 。「数组值」定义为所有满足 0 <= i < nums.length-1 的 |nums[i]-nums[i+1]| 的和。
+
+你可以选择给定数组的任意子数组，并将该子数组翻转。但你只能执行这个操作 一次 。
+
+请你找到可行的最大 数组值 。
+变化的值 abs(a[l-1]-a[r]) + abs(a[l]-a[r+1]) - abs(a[l-1]-a[l]) + abs(a[r]-a[r+1])
+
+(a[l−1]+a[l]−abs(a[l]−a[l−1]))−(a[r]+a[r+1]+abs(a[r]−a[r+1])),
+(a[l−1]−a[l]−abs(a[l]−a[l−1]))−(a[r]−a[r+1]+abs(a[r]−a[r+1])),
+(−a[l−1]+a[l]−abs(a[l]−a[l−1]))−(−a[r]+a[r+1]+abs(a[r]−a[r+1])),
+(−a[l−1]−a[l]−abs(a[l]−a[l−1]))−(−a[r]−a[r+1]+abs(a[r]−a[r+1]))
+分成前后两部分看
+
+作者：_hututu
+链接：https://leetcode.cn/problems/reverse-subarray-to-maximize-array-value/solution/onzuo-fa-jie-jue-ci-wen-ti-by-hu-tu-tu-7/
+来源：力扣（LeetCode）
+著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。
+
+边界值
+l 为0  abs(a[0]-arr[r+1])-abs(arr[r]-arr[r+1])
+r = 末位置 abs(a[l-1]-a[l]) - abs(arr[l-1]-arr[n-1])
+ */
+
+func GetAbsDiffAfterReverse (arr []int) int {
+	if len(arr) == 0 {
+		return 0
+	}
+	if len(arr) == 1 {
+		return arr[1]
+	}
+
+	origRes :=0
+	for i:=0; i < len(arr)-1; i++ {
+		origRes += arr[i]-arr[i-1]
+	}
+	var maxDiff = math.MinInt32
+	for i:=0; i < len(arr); i++ {
+		if i != 0 {
+			//l为0
+			maxDiff = int(math.Max(float64(maxDiff),math.Abs(float64(arr[0]-arr[i+1])) - math.Abs(float64(arr[i]-arr[i+1]))))
+
+		}
+		if i != len(arr)-1 {
+			// r 为n-1
+			maxDiff = int(math.Max(float64(maxDiff),math.Abs(float64(arr[0]-arr[i+1])) - math.Abs(float64(arr[i]-arr[i+1]))))
+		}
+	}
+	var myX = []int{1,1,-1,-1}
+	var myY = []int{1,-1,1,-1}
+
+	for i:=0; i<4;i++ {
+		left := make([]int,0,0)
+		right := make([]int,0,0)
+		for j := 0; j < len(arr)-1; j++ {
+			cur := int(math.Abs(float64(arr[j]-arr[j+1])))
+			v1 := myX[i]*arr[j]
+			v2 := myY[i]*arr[j]
+			left = append(left, v1 + v2 - cur)
+			right = append(right, v1 + v2 +cur)
+		}
+		maxV1 := GetAbsDiffAfterReverseGetMaxInArr(left)
+		minV2 := GetAbsDiffAfterReverseGetMinInArr(right)
+		maxDiff = int(math.Max(float64(maxDiff), float64(maxV1-minV2)))
+	}
+	return origRes+maxDiff
+}
+
+func GetAbsDiffAfterReverseGetMaxInArr (arr []int) int {
+	var max = math.MinInt32
+	for i:=0; i<len(arr); i++ {
+		if arr[i] > max {
+			max = arr[i]
+		}
+	}
+	return max
+}
+
+func GetAbsDiffAfterReverseGetMinInArr (arr []int) int {
+	var min = math.MaxInt32
+	for i:=0; i<len(arr); i++ {
+		if arr[i] < min {
+			min = arr[i]
+		}
+	}
+	return min
+}
+
+
+
+// 整数反转
+/*给你一个 32 位的有符号整数 x ，返回将 x 中的数字部分反转后的结果。
+
+如果反转后整数超过 32 位的有符号整数的范围 [−231,  231 − 1] ，就返回 0。
+
+来源：力扣（LeetCode）
+链接：https://leetcode.cn/problems/reverse-integer
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。*/
+func reverseInt (num int) int {
+	if num == 0 {
+		return 0
+	}
+	newNum := 0
+
+	for num%10 > 0 {
+		newNum += newNum*10 + num%10
+		num /= 10
+	}
+	return newNum
+}
+
+
+/*
+56. 合并区间
+以数组 intervals 表示若干个区间的集合，其中单个区间为 intervals[i] = [starti, endi] 。
+请你合并所有重叠的区间，并返回 一个不重叠的区间数组，该数组需恰好覆盖输入中的所有区间 。
+数组内的pairs 通过左端点排序，再遍历排序后的pairs 一个个处理看是否有区间重合 重合则拿最大值最小值重新划定区间
+*/
+
+//字符串相加
+func StrSum (num1 string, num2 string) string {
+	tmpByteArr := make([]byte,0,0)
+
+	i := len(num1) -1
+	j := len(num2) -1
+
+	carry := uint8(0)
+	for ;i>=0 && j >=0; {
+		cur1 := num1[i] - '0'
+		cur2 := num2[j] - '0'
+		curNum := cur1+cur2+carry
+		curNum = curNum%10
+		carry = curNum/10
+		curNumByte := curNum + '0'
+		tmpByteArr = append(tmpByteArr, curNumByte)
+	}
+
+
+	if i >= 0 {
+		for i >=0 {
+			tmpByteArr = append(tmpByteArr, num1[i])
+			i--
+		}
+	}
+
+	if j >=0 {
+		for j >=0 {
+			tmpByteArr = append(tmpByteArr, num2[j])
+			j--
+		}
+	}
+	sumByteArr := make([]byte, 0, len(tmpByteArr))
+	for i:=len(tmpByteArr)-1; i>=0; i-- {
+		sumByteArr = append(sumByteArr, tmpByteArr[i])
+	}
+	return string(sumByteArr)
+}
+
+// 字符串乘法
+/*
+  则可以通过模拟「竖式乘法」的方法计算乘积。从右往左遍历乘数，将乘数的每一位与被乘数相乘得到对应的结果
+ */
+
+func StrMulti (text1, text2 string) string {
+	len1 := len(text1)
+	len2 := len(text2)
+	ans := "0"
+	for i:= len1-1; i >= 0; i-- {
+		cur := ""
+		for j := len2-1; j > i; j-- {
+			cur += "0"
+		}
+		carry := 0
+		for j := len1 - 1; j >= 0; j-- {
+			x := text1[j] - '0'
+			y := text2[i] - '0'
+			tmp := int(x) * int(y) + carry
+			cur = strconv.Itoa(tmp%10) + cur
+			carry = tmp/10
+		}
+		for ;carry != 0; carry/=10 {
+			cur = strconv.Itoa(carry%10) + cur
+		}
+		ans = StrSum(ans, cur)
+	}
+	return ans
+}
+
+/*给定一个 m x n 整数矩阵 matrix ，找出其中 最长递增路径 的长度。
+
+对于每个单元格，你可以往上，下，左，右四个方向移动。 不能 在 对角线 方向上移动或移动到 边界外（即不允许环绕）。
+深度优先遍历 遍历过的不再遍历
+来源：力扣（LeetCode）
+链接：https://leetcode.cn/problems/fpTFWP
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。*/
+
+func GetLongestUpSeqInGrid (grid [][]int) int {
+	maxRow := len(grid)
+	maxCol := len(grid[0])
+	memo := make([][]int, len(grid))
+	for i:=0; i<len(grid); i++ {
+		memo[i] = make([]int, maxCol)
+	}
+	ans := 0
+	for i:=0; i<len(grid);i++ {
+		for j:=0; i<len(grid[0]); j++ {
+			ans = int(math.Max(float64(ans), float64(GetLongestUpSeqInGridDfs(grid, i, j, maxRow, maxCol, memo))))
+		}
+	}
+	return ans
+}
+
+func GetLongestUpSeqInGridDfs (grid [][]int, row, col, maxRow, maxCol int, memo [][]int) int {
+	if memo[row][col] != 0 {
+		return memo[row][col]
+	}
+
+	//向上走
+	if row - 1 >= 0 && grid[row - 1][col] > grid[row][col] {
+		memo[row][col] = int(math.Max(float64(memo[row][col]), float64(GetLongestUpSeqInGridDfs(grid, row-1, col, maxRow, maxCol, memo))+1))
+	}
+
+	//向下走
+	if row + 1 < maxRow && grid[row + 1][col] > grid[row][col] {
+		memo[row][col] = int(math.Max(float64(memo[row][col]), float64(GetLongestUpSeqInGridDfs(grid, row+1, col, maxRow, maxCol, memo))+1))
+	}
+
+	// 向左走
+	if col - 1 >= 0 && grid[row][col-1] > grid[row][col] {
+		memo[row][col] = int(math.Max(float64(memo[row][col]), float64(GetLongestUpSeqInGridDfs(grid, row, col-1, maxRow, maxCol, memo))+1))
+	}
+
+	if col + 1 >= 0 && grid[row][col+1] > grid[row][col] {
+		memo[row][col] = int(math.Max(float64(memo[row][col]), float64(GetLongestUpSeqInGridDfs(grid, row, col+1, maxRow, maxCol, memo))+1))
+	}
+	return memo[row][col]
+}
+
+func GetIntByStr (str string) int64 {
+	//边界条件
+	sum := int64(0)
+	lastAns := int64(0)
+	for i:=0; i<len(str); i++ {
+
+		lastAns = sum
+		sum = (sum * 10) + int64(str[i]-'0')
+		if sum < 0 {
+			return -1
+		}
+	}
+	return lastAns
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

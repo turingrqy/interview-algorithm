@@ -20,6 +20,10 @@ func (s *Stack) Pop() (val interface{}) {
 	return
 }
 
+func (s *Stack) Peek() interface{} {
+	return s.arr[len(s.arr)-1]
+}
+
 func (s *Stack) IsEmpty() bool {
 	return len(s.arr) == 0
 }
@@ -390,6 +394,22 @@ func FindTreeMidOrderNextNode (node *TreeNode) *TreeNode {
 		return parent
 	}
 }
+func FindTreeMidOrderNextNodeLoop (root, node, prev *TreeNode) *TreeNode {
+	if root == nil || node == nil {
+		return nil
+	}
+
+	leftNode := FindTreeMidOrderNextNodeLoop(root.Left, node, prev)
+	if leftNode != nil {
+		return leftNode
+	}
+	if prev == node {
+		return root
+	}
+	prev = root
+	rightNode := FindTreeMidOrderNextNodeLoop(root.Right, node, prev)
+	return rightNode
+}
 //搜索二叉树
 func FindCommonAccesstorIBST(root *TreeNode, p *TreeNode, q*TreeNode) *TreeNode {
 	if root == nil || root == p || root == q {
@@ -504,6 +524,28 @@ func GetRootToNode (root *TreeNode, node *TreeNode, num *int) bool {
 	return (isInLeft || isInRight)
 }
 
+func GetRootToNodePath (root *TreeNode, node *TreeNode, path *[]*TreeNode) bool {
+	if root == nil {
+		return false
+	}
+
+	if root == node {
+		*path = append(*path, root)
+		for _,v := range *path {
+			println(fmt.Sprintf("tree path=%d", v.Value))
+		}
+		return true
+	}
+
+	*path = append(*path, root)
+	isInLeft := GetRootToNodePath(root.Left, node, path)
+	isInRight := GetRootToNodePath(root.Right, node, path)
+	if !isInRight && !isInLeft {
+		*path = (*path)[:len(*path)-1]
+	}
+	return isInLeft || isInRight
+}
+
 func GetNodeInKlevel (root *TreeNode, k int) []*TreeNode {
 	levelArr := []*TreeNode{}
 	levelArr = append(levelArr, root)
@@ -530,6 +572,21 @@ func GetNodeInKlevel (root *TreeNode, k int) []*TreeNode {
 	}
 
 	return []*TreeNode{}
+}
+
+func GetNodeInKLevelLoop (root *TreeNode, k int, res *[]*TreeNode) {
+	if root == nil {
+		return
+	}
+
+	if k == 1 {
+		*res = append(*res, root)
+		return
+	}
+
+	GetNodeInKLevelLoop(root.Left, k-1, res)
+	GetNodeInKLevelLoop(root.Right, k-1, res)
+	return
 }
 
 func GetRootToNodeRoad (root *TreeNode, node *TreeNode, arr *[]*TreeNode) bool {
@@ -581,30 +638,25 @@ func isMatch (root1 *TreeNode, root2 *TreeNode) bool {
 	return (isMatch(root1.Left, root2.Left)&&isMatch(root1.Right, root2.Right))
 }
 
-func GetSumRoad (root *TreeNode, arr []*TreeNode, currentSum int64, expectedSum int64)  {
+func GetSumRoad (root *TreeNode, arr []*TreeNode, expectedSum int64)  {
 	if root == nil {
 		return
 	}
 
-	currentSum += root.Value
+	if expectedSum - root.Value < 0 {
+		return
+	}
 	arr = append(arr, root)
-	if currentSum == expectedSum && root.Right == nil && root.Left == nil {
-		fmt.Println(arr)
+
+	if root.Left == nil && root.Right == nil && expectedSum-root.Value == 0 {
+		for _, v := range arr {
+			println(v.Value)
+		}
+		return
 	}
 
-	if root.Left != nil {
-		GetSumRoad(root.Left, arr, currentSum, expectedSum)
-	}
-
-	if root.Right != nil {
-		GetSumRoad(root.Right, arr, currentSum, expectedSum)
-	}
-
-	if len(arr) > 1 {
-		arr = arr[:len(arr)-1]
-	} else {
-		arr = []*TreeNode{}
-	}
+	GetSumRoad(root.Left, arr, expectedSum-root.Value)
+	GetSumRoad(root.Right, arr, expectedSum-root.Value)
 }
 
 func ConvertTree2Link (root *TreeNode) *TreeNode {
@@ -631,34 +683,6 @@ func convertTreeNode (root *TreeNode, pLast **TreeNode) {
 	convertTreeNode(root.Right, pLast)
 }
 
-func PrintBorder (root *TreeNode) {
-
-	if root == nil {
-		fmt.Println("null")
-	}
-
-	levelArr := []*TreeNode{}
-	levelArr = append(levelArr, root)
-	for len(levelArr) > 0 {
-		len := len(levelArr)
-		fmt.Println(levelArr[0].Value, levelArr[len-1].Value)
-
-		tmpArr := levelArr
-		levelArr = []*TreeNode{}
-		if tmpArr[0].Left != nil {
-			levelArr = append(levelArr, tmpArr[0].Left)
-		} else if tmpArr[0].Right != nil {
-			levelArr = append(levelArr, tmpArr[0].Right)
-		}
-
-		if tmpArr[len-1].Right != nil {
-			levelArr = append(levelArr, tmpArr[len-1].Right)
-		} else if tmpArr[len-1].Left != nil  {
-			levelArr = append(levelArr, tmpArr[len-1].Left)
-		}
-	}
-
-}
 
 func SnakePrintTree (root *TreeNode) {
 	if root ==nil {
@@ -688,42 +712,6 @@ func SnakePrintTree (root *TreeNode) {
 	}
 }
 
-func PrintLeftBorder (root *TreeNode) {
-	levelArr := []*TreeNode{root}
-
-	for len (levelArr) > 0 {
-		tmp := []*TreeNode{}
-		if len(levelArr) == 1 {
-			println(levelArr[0].Value)
-			if levelArr[0].Left != nil {
-				tmp = append(tmp, levelArr[0].Left)
-			}
-			if levelArr[0].Right != nil {
-				tmp = append(tmp, levelArr[0].Right)
-			}
-		} else {
-			needPrint:=true
-			for key,node :=range levelArr {
-				if node.Left != nil {
-					tmp = append(tmp, node.Left)
-				}
-				if node.Right != nil {
-					tmp = append(tmp, node.Right)
-				}
-				if key != len(levelArr) -1 && needPrint {
-					if node.Left == nil && node.Right == nil {
-						print(node.Value)
-					} else {
-						print(node.Value)
-						needPrint = false
-					}
-				}
-
-			}
-		}
-		levelArr = tmp
-	}
-}
 
 func PrintArrOrder (arr []*TreeNode, normal bool) {
 	if normal {
@@ -737,40 +725,60 @@ func PrintArrOrder (arr []*TreeNode, normal bool) {
 	}
 }
 
-var edgeRes [][2]*TreeNode
-var leaves []*TreeNode
 
-func SetEdge (root *TreeNode,h int) {
+var leftBoarder = make(map[int]*TreeNode)
+var rightBoarder = make(map[int]*TreeNode)
+var leaves = make([]*TreeNode, 0)
+
+func SetBoarder (root *TreeNode, h int) {
 	if root == nil {
 		return
 	}
 
-	if edgeRes[h][0] == nil {
-		edgeRes[h][0] = root
+	if _, ok := leftBoarder[h]; !ok {
+		leftBoarder[h] = root
+		rightBoarder[h] = nil
 	}
 
-	if edgeRes[h][0] != nil && root != edgeRes[h][0] {
-		edgeRes[h][1] = root
+	if root != leftBoarder[h] {
+		rightBoarder[h] = root
 	}
-	SetEdge(root.Left,h+1)
-	SetEdge(root.Right,h+1)
+
+	SetBoarder(root.Left, h+1)
+	SetBoarder(root.Right, h+1)
 }
 
-func SetLeaves (root *TreeNode,h int) {
+func SetLeaves (root *TreeNode, h int) {
 	if root == nil {
 		return
 	}
 
-	if root.Left == nil && root.Right == nil && root != edgeRes[h][0] && edgeRes[h][1] != root {
+	if root.Left == nil && root.Right == nil && leftBoarder[h] != root && rightBoarder[h] != root {
 		leaves = append(leaves, root)
 	}
+
+	SetLeaves(root.Left, h+1)
+	SetLeaves(root.Right, h+1)
 }
 
-func PrintTreeBoader (root *TreeNode) {
-	h := GetHeight(root)
-	edgeRes = make([][2]*TreeNode, 0, h)
-	SetEdge(root,0)
-	SetLeaves(root,0)
+func PrintTreeBoarder (root *TreeNode) {
+	SetBoarder(root, 0)
+	SetLeaves(root, 0)
+	for i:=0; i<len(leftBoarder); i++ {
+		if leftBoarder[i] != nil {
+			fmt.Println(leftBoarder[i].Value)
+		}
+	}
+	for i:=0; i < len(leaves); i++ {
+		if leaves[i] != nil {
+			fmt.Println(leaves[i].Value)
+		}
+	}
+	for i:=len(rightBoarder)-1; i>=0; i-- {
+		if rightBoarder[i] != nil {
+			fmt.Println(rightBoarder[i].Value)
+		}
+	}
 }
 
 
@@ -825,7 +833,7 @@ func MaxGainInTreeDFS (root *TreeNode, MaxSum *int64) int64 {
 	}
 	return singleMax
 }
-//二叉树是否存在一个路径和==target的路径s
+//二叉树是否存在一个路径和==target的路径
 func HasPathSum(root *TreeNode, targetSum int) bool {
 	return HasPathSumDFS(root,targetSum,0)
 }
@@ -842,6 +850,29 @@ func HasPathSumDFS (root *TreeNode, targetSum int, sum int) bool {
 	hasRight := HasPathSumDFS(root.Right, targetSum, sum)
 	//sum -= int(root.Value)
 	return hasLeft||hasRight
+}
+
+
+// 单条路径 没必要从根节点触发
+func HasPathSumAnyWay(root *TreeNode, targetSum int) bool {
+	return HasPathSumDFSWay(root,targetSum,0)
+}
+
+func HasPathSumDFSWay (root *TreeNode, targetSum int, sum int) bool {
+	if root == nil {
+		return false
+	}
+
+	if sum + int(root.Value) == targetSum {
+		return true
+	}
+	hasLeft1 := HasPathSumDFS(root.Left, targetSum, sum)
+	hasRight1 := HasPathSumDFS(root.Right, targetSum, sum)
+	hasLeft := HasPathSumDFS(root.Left, targetSum, sum + int(root.Value))
+	hasRight := HasPathSumDFS(root.Right, targetSum, sum + int(root.Value))
+
+	//sum -= int(root.Value)
+	return hasLeft||hasRight||hasLeft1||hasRight1
 }
 
 func CountCompleteNodes(root *TreeNode) int {
@@ -886,5 +917,89 @@ func isExistInCompeleteTree (root *TreeNode, level,k int) bool {
 	return true
 }
 
+/*
+337. 打家劫舍 III
+小偷又发现了一个新的可行窃的地区。这个地区只有一个入口，我们称之为 root 。
+
+除了 root 之外，每栋房子有且只有一个“父“房子与之相连。一番侦察之后，聪明的小偷意识到“这个地方的所有房屋的排列类似于一棵二叉树”。 如果 两个直接相连的房子在同一天晚上被打劫 ，房屋将自动报警。
+
+给定二叉树的 root 。返回 在不触动警报的情况下 ，小偷能够盗取的最高金额 。
+
+简化一下这个问题：一棵二叉树，树上的每个点都有对应的权值，每个点有两种状态（选中和不选中），问在不能同时选中有父子关系的点的情况下，能选中的点的最大权值和是多少
+ */
 
 
+func RobMaxTree (root *TreeNode) int64 {
+	n := make(map[*TreeNode]int64)
+	y := make(map[*TreeNode]int64)
+
+	n[nil] = 0
+	y[nil] = 0
+	RobMaxDfs(root, n,y)
+	return int64(math.Max(float64(n[root]),float64(y[root])))
+}
+
+func RobMaxDfs (root *TreeNode, n,y map[*TreeNode]int64) {
+	if root == nil {
+
+		return
+	}
+	RobMaxDfs(root.Left, n,y)
+	RobMaxDfs(root.Right, n,y)
+
+	n[root] = int64(math.Max(float64(n[root.Left]), float64(y[root.Left])) + math.Max(float64(n[root.Right]), float64(y[root.Right])))
+	y[root] = root.Value + n[root.Left] + n[root.Right]
+}
+
+
+/*
+129. 求根节点到叶节点数字之和
+给你一个二叉树的根节点 root ，树中每个节点都存放有一个 0 到 9 之间的数字。
+每条从根节点到叶节点的路径都代表一个数字：
+
+例如，从根节点到叶节点的路径 1 -> 2 -> 3 表示数字 123 。
+计算从根节点到叶节点生成的 所有数字之和 。
+
+叶节点 是指没有子节点的节点。
+ */
+
+
+func SumByTreePathNumberDfs (root *TreeNode, cur int64) int64 {
+	if root == nil {
+		return 0
+	}
+	cur = cur*10 + root.Value
+	if root.Left == nil && root.Right == nil {
+		//到叶子节点了
+		return cur
+	} else {
+		return SumByTreePathNumberDfs(root.Left, cur) + SumByTreePathNumberDfs(root.Right, cur)
+	}
+}
+/*
+二叉树路劲和
+*/
+func SumAllRoad (root *TreeNode, cur int64) int64 {
+	if root == nil {
+		return 0
+	}
+	cur += root.Value
+	if root.Left == nil && root.Right == nil {
+		return cur
+	} else {
+		return SumAllRoad(root.Left,cur) + SumAllRoad(root.Right,cur)
+	}
+}
+
+/*
+是否镜像
+ */
+func IsMirrorTree (p, q *TreeNode) bool {
+	if p == nil && q == nil {
+		return true
+	}
+	if p == nil || q == nil {
+		return false
+	}
+	return p.Value == q.Value && IsMirrorTree(p.Left, q.Right) && IsMirrorTree(p.Right, q.Left)
+}
