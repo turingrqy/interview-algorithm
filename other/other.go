@@ -9,19 +9,56 @@ import (
 	"unsafe"
 )
 
+// 给定日志 user_id login_time logoutTime
 
-//两数相加之和 两数之和 找到所有的组合没有重复情况很简单直接map就好
-func GetTwoNumSumIndex (arr []int, target int)  {
-	indexMap := make(map[int]int)
-	for k,v :=range arr {
-		indexMap[v] = k
-	}
-	for k,v :=range arr {
-		coTarget := target-v
-		if i1,ok := indexMap[coTarget];ok {
-			fmt.Println(fmt.Sprintf("i1:%d,i2:%d", k,i1))
+type Log struct {
+	LNTime int
+	LOTime int
+}
+
+type PhaseRes struct {
+	Start int
+	End int
+}
+
+func GetPeekRange (data []Log) []PhaseRes{
+	countArr := make([]int, 86400)
+	for i:=0; i<len(data); i++ {
+		countArr[data[i].LNTime]+=1
+		if data[i].LOTime + 1 < len(countArr) {
+			countArr[data[i].LOTime + 1]-=1
 		}
 	}
+
+	for i:=1; i<len(countArr); i++ {
+		countArr[i] = countArr[i]+countArr[i-1]
+	}
+
+	max := 0
+	for i:=0; i<len(countArr); i++ {
+		if countArr[i]>max {
+			max = countArr[i]
+		}
+	}
+	start := -1
+	end := -1
+	res := []PhaseRes{}
+	for i:=0; i<len(countArr); i++ {
+		if countArr[i] == max   {
+			if start != -1 {
+				start = i
+			}
+			end = i
+		} else {
+			res = append(res, PhaseRes{Start: start, End: end})
+			start = -1
+			end = -1
+		}
+	}
+	if start != -1 {
+		res = append(res, PhaseRes{Start: start, End: end})
+	}
+	return res
 }
 
 // 数组有重复的两数之和 找出所有组合

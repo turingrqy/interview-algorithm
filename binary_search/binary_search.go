@@ -167,12 +167,12 @@ func GetKthNumInTwoArr(arr1 []int64, arr2 []int64, k int) float64 {
 		}
 		var newIndex1,newIndex2 int
 		half := k/2
-		if index1 + half < len(arr1) {
+		if index1 + half <= len(arr1) {
 			newIndex1 = index1 + half-1
 		} else {
 			newIndex1 = len(arr1)-1
 		}
-		if index2 + half < len(arr2) {
+		if index2 + half <= len(arr2) {
 			newIndex2 = index2 + half-1
 		} else {
 			newIndex2 = len(arr2)-1
